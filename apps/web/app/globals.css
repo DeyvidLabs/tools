@@ -1,0 +1,107 @@
+@import "tailwindcss";
+
+:root {
+  --background: #fefaf7;
+  --foreground: #1a1512;
+  --card: #ffffff;
+  --card-foreground: #1a1512;
+  --primary: #ac713e;
+  --primary-foreground: #fef7f2;
+  --secondary: #f5efe8;
+  --secondary-foreground: #1a1512;
+  --muted: #f5efe8;
+  --muted-foreground: #8a7d70;
+  --border: #e8ddd0;
+  --ring: #ac713e;
+
+  --accent-amber: #f99c00;
+  --accent-orange: #ff8b1a;
+  --accent-rose: #ff667f;
+  --accent-purple: #c07eff;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #17120e;
+    --foreground: #f4ede8;
+    --card: #211a15;
+    --card-foreground: #f4ede8;
+    --primary: #c68a52;
+    --primary-foreground: #1a1512;
+    --secondary: #241d17;
+    --secondary-foreground: #f4ede8;
+    --muted: #241d17;
+    --muted-foreground: #a89a8c;
+    --border: #2c231b;
+    --ring: #c68a52;
+  }
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-ring: var(--ring);
+  --color-accent-amber: var(--accent-amber);
+  --color-accent-orange: var(--accent-orange);
+  --color-accent-rose: var(--accent-rose);
+  --color-accent-purple: var(--accent-purple);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+/* Grid background: static graph-paper lines, faded out toward the edges via
+   a radial mask, with one restrained warm glow behind the hero. Everything
+   here is static (no keyframes) — zero animation cost, GPU or not. */
+.bg-grid {
+  position: fixed;
+  inset: 0;
+  z-index: -10;
+  pointer-events: none;
+  background-image:
+    linear-gradient(to right, var(--border) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--border) 1px, transparent 1px);
+  background-size: 44px 44px;
+  opacity: 0.5;
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 0%, #000 40%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 0%, #000 40%, transparent 100%);
+}
+
+@media (prefers-color-scheme: dark) {
+  .bg-grid {
+    opacity: 0.4;
+  }
+}
+
+.bg-glow {
+  position: fixed;
+  top: -12rem;
+  left: 50%;
+  translate: -50% 0;
+  z-index: -10;
+  width: 42rem;
+  height: 24rem;
+  background: var(--accent-orange);
+  filter: blur(110px);
+  opacity: 0.16;
+  pointer-events: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  .bg-glow {
+    opacity: 0.12;
+  }
+}
