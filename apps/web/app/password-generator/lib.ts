@@ -21,7 +21,12 @@ export interface GeneratorOptions {
   uppercase: boolean;
   lowercase: boolean;
   numbers: boolean;
-  symbolChars: string; // subset of ALL_SYMBOLS currently allowed; "" = no symbols
+  // Whether the symbols category counts toward generation at all — kept
+  // separate from `symbolChars` so clearing the selection (e.g. down to one
+  // specific symbol) doesn't also collapse the picker or reset it back to
+  // "all symbols" the next time it's turned on.
+  symbolsEnabled: boolean;
+  symbolChars: string; // subset of ALL_SYMBOLS currently allowed; "" = none picked yet
   excludeAmbiguous: boolean;
 }
 
@@ -30,6 +35,7 @@ export const DEFAULT_OPTIONS: GeneratorOptions = {
   uppercase: true,
   lowercase: true,
   numbers: true,
+  symbolsEnabled: true,
   symbolChars: ALL_SYMBOLS,
   excludeAmbiguous: false,
 };
@@ -45,7 +51,7 @@ function activeCategories(options: GeneratorOptions): string[] {
   if (options.uppercase) categories.push(charsetFor("uppercase", options.excludeAmbiguous));
   if (options.lowercase) categories.push(charsetFor("lowercase", options.excludeAmbiguous));
   if (options.numbers) categories.push(charsetFor("numbers", options.excludeAmbiguous));
-  if (options.symbolChars.length > 0) categories.push(options.symbolChars);
+  if (options.symbolsEnabled && options.symbolChars.length > 0) categories.push(options.symbolChars);
   return categories.filter((chars) => chars.length > 0);
 }
 
@@ -117,11 +123,18 @@ export interface Strength {
   segments: number;
 }
 
+// Thresholds follow NIST SP 800-57/800-131A security-strength categories
+// (bits of entropy are directly comparable to cryptographic key strength for
+// a uniformly random secret): <80 deprecated, 112 acceptable through 2030,
+// 128 good long-term, 192+ very high. NIST SP 800-63B (the password-specific
+// guideline) deliberately dropped bit-based scoring for human-chosen
+// passwords, but that reasoning doesn't apply here since this tool generates
+// uniformly random secrets, not human-chosen ones.
 export function getStrength(bits: number): Strength {
   if (bits <= 0) return { label: "—", colorVar: "var(--muted-foreground)", segments: 0 };
-  if (bits < 40) return { label: "Weak", colorVar: "var(--accent-rose)", segments: 1 };
-  if (bits < 60) return { label: "Fair", colorVar: "var(--accent-orange)", segments: 2 };
-  if (bits < 80) return { label: "Good", colorVar: "var(--accent-amber)", segments: 3 };
-  if (bits < 120) return { label: "Strong", colorVar: "var(--primary)", segments: 4 };
+  if (bits < 80) return { label: "Weak", colorVar: "var(--accent-rose)", segments: 1 };
+  if (bits < 112) return { label: "Fair", colorVar: "var(--accent-orange)", segments: 2 };
+  if (bits < 128) return { label: "Good", colorVar: "var(--accent-amber)", segments: 3 };
+  if (bits < 192) return { label: "Strong", colorVar: "var(--primary)", segments: 4 };
   return { label: "Excellent", colorVar: "var(--accent-purple)", segments: 5 };
 }
