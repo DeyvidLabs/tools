@@ -54,17 +54,17 @@ export function PasswordGenerator() {
   const entropyBits = useMemo(() => calculateEntropyBits(options), [options]);
   const strength = useMemo(() => getStrength(entropyBits), [entropyBits]);
 
-  const symbolsOn = options.symbolChars.length > 0;
+  const symbolsOn = options.symbolsEnabled;
 
   const toggleCharset = (key: CharsetKey) => {
     updateOptions((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
   const toggleSymbolsMaster = () => {
-    updateOptions((prev) => ({
-      ...prev,
-      symbolChars: prev.symbolChars.length > 0 ? "" : ALL_SYMBOLS,
-    }));
+    // Only flips whether symbols count toward generation — never touches
+    // symbolChars, so re-enabling restores whatever subset was picked before
+    // instead of resetting to "all symbols".
+    updateOptions((prev) => ({ ...prev, symbolsEnabled: !prev.symbolsEnabled }));
   };
 
   const toggleSymbolChar = (char: string) => {
@@ -84,7 +84,7 @@ export function PasswordGenerator() {
 
   return (
     <div className="flex flex-1 flex-col items-center px-6 py-24">
-      <div className="w-full max-w-xl">
+      <div className="w-full max-w-2xl">
         <Link
           href="/"
           className="text-sm text-muted-foreground transition-colors hover:text-primary"
@@ -100,10 +100,10 @@ export function PasswordGenerator() {
         </p>
 
         <div className="mt-8 rounded-lg border border-border bg-card/70 p-5 backdrop-blur-sm">
-          <div className="flex items-center gap-2">
+          <div className="flex items-start gap-2">
             <output
               aria-label="Generated password"
-              className="min-w-0 flex-1 overflow-x-auto rounded-md border border-border bg-secondary px-4 py-3 font-mono text-lg break-all text-secondary-foreground"
+              className="min-h-40 min-w-0 flex-1 break-all rounded-md border border-border bg-secondary px-4 py-3 font-mono text-lg text-secondary-foreground"
             >
               {password || "Select at least one character set"}
             </output>
@@ -206,8 +206,11 @@ export function PasswordGenerator() {
             </label>
           </div>
 
-          {symbolsOn && (
-            <div className="mt-3 rounded-md border border-border p-3">
+          <div
+            className={`mt-3 rounded-md border border-border p-3 transition-opacity ${
+              symbolsOn ? "" : "pointer-events-none opacity-40"
+            }`}
+          >
               <p className="text-xs text-muted-foreground">
                 Some sites only accept a few symbols — pick exactly which ones are allowed.
               </p>
@@ -222,7 +225,7 @@ export function PasswordGenerator() {
                       key={char}
                       type="button"
                       onClick={() => toggleSymbolChar(char)}
-                      disabled={onlyActiveCategory}
+                      disabled={!symbolsOn || onlyActiveCategory}
                       aria-pressed={selected}
                       title={selected ? `Remove ${char}` : `Allow ${char}`}
                       className={`h-8 w-8 rounded-md border font-mono text-sm transition-colors disabled:pointer-events-none disabled:opacity-40 ${
@@ -240,20 +243,21 @@ export function PasswordGenerator() {
                 <button
                   type="button"
                   onClick={() => setOptions((prev) => ({ ...prev, symbolChars: ALL_SYMBOLS }))}
-                  className="text-muted-foreground underline-offset-2 hover:text-primary hover:underline"
+                  disabled={!symbolsOn}
+                  className="text-muted-foreground underline-offset-2 hover:text-primary hover:underline disabled:pointer-events-none"
                 >
                   Select all
                 </button>
                 <button
                   type="button"
                   onClick={() => updateOptions((prev) => ({ ...prev, symbolChars: "" }))}
-                  className="text-muted-foreground underline-offset-2 hover:text-primary hover:underline"
+                  disabled={!symbolsOn}
+                  className="text-muted-foreground underline-offset-2 hover:text-primary hover:underline disabled:pointer-events-none"
                 >
                   Clear
                 </button>
               </div>
-            </div>
-          )}
+          </div>
 
           <label className="mt-3 flex cursor-pointer items-center gap-2.5 rounded-md border border-border px-3 py-2.5 transition-colors has-[:checked]:border-primary/50 has-[:checked]:bg-primary/5">
             <input
