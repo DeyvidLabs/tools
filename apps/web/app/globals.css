@@ -5,17 +5,17 @@
   --foreground: #1a1512;
   --card: #ffffff;
   --card-foreground: #1a1512;
-  --primary: #ac713e;
+  --primary: #b03a2e;
   --primary-foreground: #fef7f2;
   --secondary: #f5efe8;
   --secondary-foreground: #1a1512;
   --muted: #f5efe8;
   --muted-foreground: #8a7d70;
   --border: #e8ddd0;
-  --ring: #ac713e;
+  --ring: #b03a2e;
 
   --accent-amber: #f99c00;
-  --accent-orange: #ff8b1a;
+  --accent-orange: #c1443a;
   --accent-rose: #ff667f;
   --accent-purple: #c07eff;
 }
@@ -26,14 +26,14 @@
     --foreground: #f4ede8;
     --card: #211a15;
     --card-foreground: #f4ede8;
-    --primary: #c68a52;
+    --primary: #d97a6c;
     --primary-foreground: #1a1512;
     --secondary: #241d17;
     --secondary-foreground: #f4ede8;
     --muted: #241d17;
     --muted-foreground: #a89a8c;
     --border: #2c231b;
-    --ring: #c68a52;
+    --ring: #d97a6c;
   }
 }
 
