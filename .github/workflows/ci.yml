@@ -1,0 +1,27 @@
+name: CI
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+
+jobs:
+  web:
+    name: web (lint, typecheck, test)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # apps/api is an unmodified upstream boilerplate with pre-existing lint
+      # debt (see fileexists/nestjs-backend) — CI only covers apps/web, where
+      # the tools themselves live, until that's cleaned up separately.
+      - run: pnpm turbo run lint typecheck test --filter=web
