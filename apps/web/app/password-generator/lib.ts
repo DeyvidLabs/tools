@@ -2,13 +2,18 @@ export const CHARSETS = {
   uppercase: "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
   lowercase: "abcdefghijklmnopqrstuvwxyz",
   numbers: "0123456789",
-  symbols: "!@#$%^&*()_+-=[]{}|;:,.<>?/~",
 } as const;
 
 export type CharsetKey = keyof typeof CHARSETS;
 
+// All symbols the generator can use. Split out from CHARSETS (rather than a
+// plain boolean toggle) because some sites only accept a subset — e.g. only
+// `$!@#` and not `.?%` — so users need to pick exactly which ones are allowed.
+export const ALL_SYMBOLS = "!@#$%^&*()_+-=[]{}|;:,.<>?/~";
+
 // Visually confusable characters (1/l/I, 0/O) — off by default toggle, useful
-// when a password will be transcribed by hand or read aloud.
+// when a password will be transcribed by hand or read aloud. None of these
+// are symbols, so this only ever filters the three letter/number charsets.
 const AMBIGUOUS = "Il1O0";
 
 export interface GeneratorOptions {
@@ -16,7 +21,7 @@ export interface GeneratorOptions {
   uppercase: boolean;
   lowercase: boolean;
   numbers: boolean;
-  symbols: boolean;
+  symbolChars: string; // subset of ALL_SYMBOLS currently allowed; "" = no symbols
   excludeAmbiguous: boolean;
 }
 
@@ -25,7 +30,7 @@ export const DEFAULT_OPTIONS: GeneratorOptions = {
   uppercase: true,
   lowercase: true,
   numbers: true,
-  symbols: true,
+  symbolChars: ALL_SYMBOLS,
   excludeAmbiguous: false,
 };
 
@@ -36,10 +41,18 @@ function charsetFor(key: CharsetKey, excludeAmbiguous: boolean): string {
 }
 
 function activeCategories(options: GeneratorOptions): string[] {
-  return (Object.keys(CHARSETS) as CharsetKey[])
-    .filter((key) => options[key])
-    .map((key) => charsetFor(key, options.excludeAmbiguous))
-    .filter((chars) => chars.length > 0);
+  const categories: string[] = [];
+  if (options.uppercase) categories.push(charsetFor("uppercase", options.excludeAmbiguous));
+  if (options.lowercase) categories.push(charsetFor("lowercase", options.excludeAmbiguous));
+  if (options.numbers) categories.push(charsetFor("numbers", options.excludeAmbiguous));
+  if (options.symbolChars.length > 0) categories.push(options.symbolChars);
+  return categories.filter((chars) => chars.length > 0);
+}
+
+// True if these options leave at least one character to draw from — used to
+// guard every toggle/chip so the user can never end up with an empty pool.
+export function hasAnyCharacters(options: GeneratorOptions): boolean {
+  return activeCategories(options).length > 0;
 }
 
 // Rejection-sampled uniform int in [0, maxExclusive) — avoids the modulo bias
