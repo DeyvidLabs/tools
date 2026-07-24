@@ -3,10 +3,12 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
+  ALL_SYMBOLS,
   DEFAULT_OPTIONS,
   calculateEntropyBits,
   generatePassword,
   getStrength,
+  hasAnyCharacters,
   type CharsetKey,
   type GeneratorOptions,
 } from "./lib";
@@ -15,7 +17,6 @@ const CHARSET_TOGGLES: { key: CharsetKey; label: string; sample: string }[] = [
   { key: "uppercase", label: "Uppercase", sample: "ABC" },
   { key: "lowercase", label: "Lowercase", sample: "abc" },
   { key: "numbers", label: "Numbers", sample: "123" },
-  { key: "symbols", label: "Symbols", sample: "!@#" },
 ];
 
 export function PasswordGenerator() {
@@ -25,7 +26,15 @@ export function PasswordGenerator() {
   const [regenKey, setRegenKey] = useState(0);
   const [copied, setCopied] = useState(false);
 
-  const activeCount = CHARSET_TOGGLES.filter((t) => options[t.key]).length;
+  // Applies an options update unless it would leave zero characters to draw
+  // from — the single guard every toggle/chip below relies on.
+  const updateOptions = (updater: (prev: GeneratorOptions) => GeneratorOptions) => {
+    setOptions((prev) => {
+      const next = updater(prev);
+      if (hasAnyCharacters(prev) && !hasAnyCharacters(next)) return prev;
+      return next;
+    });
+  };
 
   // Derived from options + regenKey — computed during render rather than in
   // an effect, since it's a pure function of state with no external system
@@ -45,13 +54,25 @@ export function PasswordGenerator() {
   const entropyBits = useMemo(() => calculateEntropyBits(options), [options]);
   const strength = useMemo(() => getStrength(entropyBits), [entropyBits]);
 
+  const symbolsOn = options.symbolChars.length > 0;
+
   const toggleCharset = (key: CharsetKey) => {
-    setOptions((prev) => {
-      const next = { ...prev, [key]: !prev[key] };
-      const stillHasOne = CHARSET_TOGGLES.some((t) => next[t.key]);
-      // Never allow every charset to be turned off — there'd be nothing left
-      // to generate from.
-      return stillHasOne ? next : prev;
+    updateOptions((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const toggleSymbolsMaster = () => {
+    updateOptions((prev) => ({
+      ...prev,
+      symbolChars: prev.symbolChars.length > 0 ? "" : ALL_SYMBOLS,
+    }));
+  };
+
+  const toggleSymbolChar = (char: string) => {
+    updateOptions((prev) => {
+      const symbolChars = prev.symbolChars.includes(char)
+        ? prev.symbolChars.replace(char, "")
+        : [...ALL_SYMBOLS].filter((c) => prev.symbolChars.includes(c) || c === char).join("");
+      return { ...prev, symbolChars };
     });
   };
 
@@ -66,7 +87,7 @@ export function PasswordGenerator() {
       <div className="w-full max-w-xl">
         <Link
           href="/"
-          className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+          className="text-sm text-muted-foreground transition-colors hover:text-primary"
         >
           ← Tools
         </Link>
@@ -146,7 +167,7 @@ export function PasswordGenerator() {
             max={128}
             value={options.length}
             onChange={(e) =>
-              setOptions((prev) => ({ ...prev, length: Number(e.target.value) }))
+              updateOptions((prev) => ({ ...prev, length: Number(e.target.value) }))
             }
             style={{ accentColor: "var(--primary)" }}
             className="mt-2 w-full cursor-pointer"
@@ -162,7 +183,6 @@ export function PasswordGenerator() {
                   type="checkbox"
                   checked={options[key]}
                   onChange={() => toggleCharset(key)}
-                  disabled={options[key] && activeCount === 1}
                   style={{ accentColor: "var(--primary)" }}
                 />
                 <span className="text-sm text-card-foreground">{label}</span>
@@ -171,7 +191,69 @@ export function PasswordGenerator() {
                 </span>
               </label>
             ))}
+
+            <label className="flex cursor-pointer items-center gap-2.5 rounded-md border border-border px-3 py-2.5 transition-colors has-[:checked]:border-primary/50 has-[:checked]:bg-primary/5">
+              <input
+                type="checkbox"
+                checked={symbolsOn}
+                onChange={toggleSymbolsMaster}
+                style={{ accentColor: "var(--primary)" }}
+              />
+              <span className="text-sm text-card-foreground">Symbols</span>
+              <span className="ml-auto font-mono text-xs text-muted-foreground">
+                !@#
+              </span>
+            </label>
           </div>
+
+          {symbolsOn && (
+            <div className="mt-3 rounded-md border border-border p-3">
+              <p className="text-xs text-muted-foreground">
+                Some sites only accept a few symbols — pick exactly which ones are allowed.
+              </p>
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {[...ALL_SYMBOLS].map((char) => {
+                  const selected = options.symbolChars.includes(char);
+                  const isLastChar = selected && options.symbolChars.length === 1;
+                  const onlyActiveCategory =
+                    isLastChar && !options.uppercase && !options.lowercase && !options.numbers;
+                  return (
+                    <button
+                      key={char}
+                      type="button"
+                      onClick={() => toggleSymbolChar(char)}
+                      disabled={onlyActiveCategory}
+                      aria-pressed={selected}
+                      title={selected ? `Remove ${char}` : `Allow ${char}`}
+                      className={`h-8 w-8 rounded-md border font-mono text-sm transition-colors disabled:pointer-events-none disabled:opacity-40 ${
+                        selected
+                          ? "border-primary/50 bg-primary/10 text-primary"
+                          : "border-border text-muted-foreground hover:border-primary/50 hover:text-primary"
+                      }`}
+                    >
+                      {char}
+                    </button>
+                  );
+                })}
+              </div>
+              <div className="mt-2 flex gap-3 text-xs">
+                <button
+                  type="button"
+                  onClick={() => setOptions((prev) => ({ ...prev, symbolChars: ALL_SYMBOLS }))}
+                  className="text-muted-foreground underline-offset-2 hover:text-primary hover:underline"
+                >
+                  Select all
+                </button>
+                <button
+                  type="button"
+                  onClick={() => updateOptions((prev) => ({ ...prev, symbolChars: "" }))}
+                  className="text-muted-foreground underline-offset-2 hover:text-primary hover:underline"
+                >
+                  Clear
+                </button>
+              </div>
+            </div>
+          )}
 
           <label className="mt-3 flex cursor-pointer items-center gap-2.5 rounded-md border border-border px-3 py-2.5 transition-colors has-[:checked]:border-primary/50 has-[:checked]:bg-primary/5">
             <input
