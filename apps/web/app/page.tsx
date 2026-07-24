@@ -1,11 +1,13 @@
+import Link from "next/link";
+
 const tools = [
-  "Password Generator",
-  "Webhook Tester",
-  "WebSocket Tester",
-  "Discord Embed Builder",
-  "JWT Debugger",
-  "Cron Expression Builder",
-  "Pastebin",
+  { name: "Password Generator", href: "/password-generator" },
+  { name: "Webhook Tester" },
+  { name: "WebSocket Tester" },
+  { name: "Discord Embed Builder" },
+  { name: "JWT Debugger" },
+  { name: "Cron Expression Builder" },
+  { name: "Pastebin" },
 ];
 
 export default function Home() {
@@ -16,20 +18,36 @@ export default function Home() {
           Tools
         </h1>
         <p className="mt-2 text-muted-foreground">
-          Placeholder — nessun tool è ancora implementato.
+          A collection of self-contained dev tools. Most run entirely in your browser.
         </p>
 
         <div className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
-          {tools.map((tool) => (
-            <div
-              key={tool}
-              className="group rounded-lg border border-border bg-card/70 p-5 backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-[0_8px_24px_-12px_var(--primary)]"
-            >
-              <span className="font-medium text-card-foreground transition-colors group-hover:text-primary">
-                {tool}
-              </span>
-            </div>
-          ))}
+          {tools.map((tool) =>
+            tool.href ? (
+              <Link
+                key={tool.name}
+                href={tool.href}
+                className="group rounded-lg border border-border bg-card/70 p-5 backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-[0_8px_24px_-12px_var(--primary)]"
+              >
+                <span className="font-medium text-card-foreground transition-colors group-hover:text-primary">
+                  {tool.name}
+                </span>
+              </Link>
+            ) : (
+              <div
+                key={tool.name}
+                aria-disabled="true"
+                className="rounded-lg border border-border bg-card/70 p-5 opacity-50"
+              >
+                <span className="font-medium text-card-foreground">
+                  {tool.name}
+                </span>
+                <span className="ml-2 text-xs text-muted-foreground">
+                  soon
+                </span>
+              </div>
+            ),
+          )}
         </div>
       </div>
     </div>
