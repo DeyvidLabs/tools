@@ -8,6 +8,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
 import compression from 'compression';
 import helmet from 'helmet';
@@ -17,7 +18,22 @@ import { RequestIdInterceptor } from './common/interceptors/request-id.intercept
 
 async function bootstrap(): Promise<void> {
   const logger = new Logger('Bootstrap');
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  // Default body parsing disabled — wired manually below so the webhook
+  // capture route can record the exact raw bytes of any content type
+  // instead of only application/json and x-www-form-urlencoded.
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    bodyParser: false,
+  });
+
+  // Path-scoped raw parser for the capture route: reads the body as a Buffer
+  // regardless of Content-Type. Runs before the generic parsers below, so
+  // body-parser marks the request as already-parsed and they skip it.
+  app.use(
+    '/api/webhook/capture',
+    bodyParser.raw({ type: () => true, limit: '256kb' }),
+  );
+  app.use(bodyParser.json());
+  app.use(bodyParser.urlencoded({ extended: true }));
 
   // Trust the first proxy hop (nginx/Caddy) so req.ip and the ThrottlerGuard
   // see the real client IP instead of bucketing every request under the proxy's IP.

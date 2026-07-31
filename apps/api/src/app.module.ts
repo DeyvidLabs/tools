@@ -2,14 +2,18 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { ScheduleModule } from '@nestjs/schedule';
 import { APP_GUARD } from '@nestjs/core';
 import * as Joi from 'joi';
 import { resolve } from 'path';
 import { User } from './common/entities/user.entity';
 import { Permission } from './common/entities/permission.entity';
+import { WebhookBin } from './common/entities/webhook-bin.entity';
+import { WebhookRequest } from './common/entities/webhook-request.entity';
 import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
 import { PermissionModule } from './modules/permission/permission.module';
+import { WebhookModule } from './modules/webhook/webhook.module';
 import { AuthGuard } from './common/guards/auth.guard';
 import { PermissionsGuard } from './common/guards/permissions.guard';
 import { AppController } from './app.controller';
@@ -34,6 +38,7 @@ import { AppController } from './app.controller';
         GOOGLE_CLIENT_ID: Joi.string().optional().allow(''),
         GOOGLE_CLIENT_SECRET: Joi.string().optional().allow(''),
         GOOGLE_CALLBACK_URL: Joi.string().optional().allow(''),
+        WEBHOOK_BIN_TTL_HOURS: Joi.number().positive().default(24),
       }),
       validationOptions: { allowUnknown: true, abortEarly: true },
     }),
@@ -43,7 +48,7 @@ import { AppController } from './app.controller';
       useFactory: (configService: ConfigService) => ({
         type: 'postgres',
         url: configService.get<string>('DATABASE_URL'),
-        entities: [User, Permission],
+        entities: [User, Permission, WebhookBin, WebhookRequest],
         synchronize: configService.get<string>('NODE_ENV') === 'development',
         logging: configService.get<string>('NODE_ENV') === 'development',
       }),
@@ -51,6 +56,8 @@ import { AppController } from './app.controller';
     AuthModule,
     UserModule,
     PermissionModule,
+    WebhookModule,
+    ScheduleModule.forRoot(),
     ThrottlerModule.forRoot({
       throttlers: [{ ttl: 60_000, limit: 100 }],
     }),
