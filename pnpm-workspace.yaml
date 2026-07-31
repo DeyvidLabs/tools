@@ -10,13 +10,17 @@ allowBuilds:
 overrides:
   # migrated from apps/api's yarn "resolutions" (security pins for transitive deps) —
   # pnpm ignores "resolutions" entirely, so these need to live here instead.
+  # sharp is pinned past next's declared ^0.34.5 range: next doesn't use next/image
+  # here, so the unused optional dep is forced to a patched version for hygiene.
+  sharp: ^0.35.3
   '@babel/core': ^7.29.6
   handlebars: ^4.7.9
   piscina: ^4.9.3
   '@xhmikosr/decompress': ^10.2.1
   file-type: ^21.3.4
   yauzl: ^3.2.1
-  fast-uri: ^3.1.2
+  fast-uri: ^3.1.4
+  postcss: ^8.5.19
   serialize-javascript: ^7.0.5
   flatted: ^3.4.2
   form-data: ^4.0.6
@@ -29,6 +33,7 @@ overrides:
   '@eslint/eslintrc>js-yaml': ^4.2.0
   'cosmiconfig>js-yaml': ^4.2.0
   '@istanbuljs/load-nyc-config>js-yaml': ^3.15.0
+  '@nestjs/swagger>js-yaml': ^5.2.2
   'node-emoji>lodash': ^4.18.0
   'eslint>brace-expansion': ^1.1.13
   '@eslint/eslintrc>brace-expansion': ^1.1.13
