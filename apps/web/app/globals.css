@@ -86,6 +86,11 @@ body {
   }
 }
 
+/* A radial gradient reads visually the same as a solid blob run through
+   filter: blur() but is far cheaper to paint — filter: blur() on a large
+   `position: fixed` element forces a per-frame repaint on scroll on mobile
+   Safari/Chrome (the fixed layer can't stay a cheap, static compositor
+   layer once a blur filter is attached to it). */
 .bg-glow {
   position: fixed;
   top: -12rem;
@@ -94,8 +99,7 @@ body {
   z-index: -10;
   width: 42rem;
   height: 24rem;
-  background: var(--accent-orange);
-  filter: blur(110px);
+  background: radial-gradient(closest-side, var(--accent-orange), transparent);
   opacity: 0.16;
   pointer-events: none;
 }
