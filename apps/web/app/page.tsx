@@ -7,7 +7,7 @@ const tools = [
   { name: "Discord Embed Builder", href: "/discord-embed-builder" },
   { name: "JWT Debugger", href: "/jwt-debugger" },
   { name: "Cron Expression Builder", href: "/cron-expression-builder" },
-  { name: "Pastebin" },
+  { name: "Pastebin", href: "/pastebin" },
 ];
 
 export default function Home() {
