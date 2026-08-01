@@ -21,13 +21,15 @@ function Field({
   label,
   children,
   hint,
+  grow = true,
 }: {
   label: string;
   children: React.ReactNode;
   hint?: string;
+  grow?: boolean;
 }) {
   return (
-    <label className="flex flex-col gap-1">
+    <label className={`flex min-w-0 flex-col gap-1 ${grow ? "flex-1" : "shrink-0"}`}>
       <span className={labelClass}>
         {label}
         {hint && <span className="ml-1 text-muted-foreground/70">{hint}</span>}
@@ -158,7 +160,7 @@ export function DiscordEmbedBuilder() {
                       onChange={(e) => updateEmbed({ title: e.target.value })}
                     />
                   </Field>
-                  <Field label="Color">
+                  <Field label="Color" grow={false}>
                     <input
                       type="color"
                       className="h-9 w-14 shrink-0 rounded-md border border-border bg-secondary p-1"
