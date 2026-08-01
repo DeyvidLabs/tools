@@ -4,7 +4,7 @@ const tools = [
   { name: "Password Generator", href: "/password-generator" },
   { name: "Webhook Tester", href: "/webhook-tester" },
   { name: "WebSocket Tester", href: "/websocket-tester" },
-  { name: "Discord Embed Builder" },
+  { name: "Discord Embed Builder", href: "/discord-embed-builder" },
   { name: "JWT Debugger" },
   { name: "Cron Expression Builder" },
   { name: "Pastebin" },
