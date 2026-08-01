@@ -31,11 +31,12 @@ overrides:
   eslint>brace-expansion: ^1.1.13
   '@eslint/eslintrc>brace-expansion': ^1.1.13
   jest>brace-expansion: ^1.1.13
-  '@nestjs/cli>brace-expansion': ^5.0.6
+  '@nestjs/cli>brace-expansion': ^5.0.8
   fork-ts-checker-webpack-plugin>brace-expansion: ^1.1.13
-  '@typescript-eslint/eslint-plugin>brace-expansion': ^5.0.6
+  '@typescript-eslint/eslint-plugin>brace-expansion': ^5.0.8
   '@swc/cli>brace-expansion': ^2.0.3
   typeorm>brace-expansion: ^2.0.3
+  minimatch@10>brace-expansion: ^5.0.9
 
 importers:
 
@@ -2593,9 +2594,9 @@ packages:
   brace-expansion@2.1.2:
     resolution: {integrity: sha512-w5JZcKgdhDOgOwm8H+KgbosopHMuGcl6qbulwjtz3SM7I7P3yW1eAjzMPLrIE+NQ9vjgANKHWeMHnrT0OXW1oA==}
 
-  brace-expansion@5.0.7:
-    resolution: {integrity: sha512-7oFy703dxfY3/NLxC1fh2SUCQ0H9rmAY+5EpDVfXjUTTs+HEwR2nYaqLv+GWcTsumwxPfiz6CzCNkwXwBUwqCA==}
-    engines: {node: 18 || 20 || >=22}
+  brace-expansion@5.0.9:
+    resolution: {integrity: sha512-ScQ4IuvIEF1TMlP7Zt+vjJ//9zlPb2SDcxWxM3bk8s6t6GGdJ7KO1dCcTidOPJKePW30LE/2cT7wCyPho9/Wxg==}
+    engines: {node: 20 || >=22}
 
   braces@3.0.3:
     resolution: {integrity: sha512-yQbXgO/OSZVD2IsiLlro+7Hf6Q18EJrKSEsdoMzKePKXct3gvD8oLcOQdIzGupr5Fj+EDe8gO/lxc1BzfMpxvA==}
@@ -8247,7 +8248,7 @@ snapshots:
     dependencies:
       balanced-match: 1.0.2
 
-  brace-expansion@5.0.7:
+  brace-expansion@5.0.9:
     dependencies:
       balanced-match: 4.0.4
 
@@ -10255,7 +10256,7 @@ snapshots:
 
   minimatch@10.2.5:
     dependencies:
-      brace-expansion: 5.0.7
+      brace-expansion: 5.0.9
 
   minimatch@3.1.5:
     dependencies:
