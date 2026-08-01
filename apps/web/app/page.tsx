@@ -12,7 +12,7 @@ const tools = [
 
 export default function Home() {
   return (
-    <div className="flex flex-1 flex-col items-center px-6 py-24">
+    <div className="flex flex-1 flex-col items-center px-6 py-10">
       <div className="w-full max-w-4xl">
         <h1 className="text-3xl font-semibold tracking-tight text-foreground">
           Tools

@@ -26,14 +26,14 @@
     --foreground: #f4ede8;
     --card: #211a15;
     --card-foreground: #f4ede8;
-    --primary: #d97a6c;
+    --primary: #e15b47;
     --primary-foreground: #1a1512;
     --secondary: #241d17;
     --secondary-foreground: #f4ede8;
     --muted: #241d17;
     --muted-foreground: #a89a8c;
     --border: #2c231b;
-    --ring: #d97a6c;
+    --ring: #e15b47;
   }
 }
 
@@ -134,6 +134,6 @@ body {
 
 @media (prefers-color-scheme: dark) {
   .bg-glow {
-    opacity: 0.12;
+    opacity: 0.22;
   }
 }

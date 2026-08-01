@@ -101,7 +101,7 @@ export function WebhookTester() {
   }, [copied]);
 
   return (
-    <div className="flex flex-1 flex-col items-center px-6 py-24">
+    <div className="flex flex-1 flex-col items-center px-6 py-10">
       <div className="w-full max-w-2xl">
         <Link href="/" className="text-sm text-muted-foreground transition-colors hover:text-primary">
           ← Tools
