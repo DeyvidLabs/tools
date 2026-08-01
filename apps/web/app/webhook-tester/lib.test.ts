@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   buildCaptureUrl,
   displayBody,
+  formatDate,
   formatRelativeTime,
   sameRequestIds,
   type CapturedRequest,
@@ -121,5 +122,12 @@ describe("sameRequestIds", () => {
     const a = [buildRequest({ id: "1" }), buildRequest({ id: "2" })];
     const b = [buildRequest({ id: "2" }), buildRequest({ id: "1" })];
     expect(sameRequestIds(a, b)).toBe(false);
+  });
+});
+
+describe("formatDate", () => {
+  it("spells out the month so day/month order can't be misread", () => {
+    const formatted = formatDate(new Date(Date.UTC(2026, 0, 2, 3, 4, 5)).toISOString());
+    expect(formatted).not.toMatch(/^\d{1,2}[/.]\d{1,2}[/.]\d{2,4}/);
   });
 });

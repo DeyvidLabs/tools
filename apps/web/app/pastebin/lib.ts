@@ -62,15 +62,13 @@ export async function deletePaste(id: string, deleteToken: string): Promise<bool
   return true;
 }
 
+// Spells out the month (dateStyle: "medium") instead of using digits, so
+// the date reads unambiguously regardless of whether the browser's locale
+// orders day/month as DD/MM or MM/DD — same convention as jwt-debugger's
+// and cron-expression-builder's date formatters.
 export function formatExpiry(expiresAt: string | null, now: number = Date.now()): string {
   if (expiresAt === null) return "Never expires";
-  const deltaMs = new Date(expiresAt).getTime() - now;
-  if (deltaMs <= 0) return "Expired";
-
-  const minutes = Math.round(deltaMs / 60_000);
-  if (minutes < 60) return `Expires in ${minutes}m`;
-  const hours = Math.round(minutes / 60);
-  if (hours < 24) return `Expires in ${hours}h`;
-  const days = Math.round(hours / 24);
-  return `Expires in ${days}d`;
+  const date = new Date(expiresAt);
+  if (date.getTime() <= now) return "Expired";
+  return `Expires ${new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(date)}`;
 }
