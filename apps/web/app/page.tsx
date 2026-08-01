@@ -5,8 +5,8 @@ const tools = [
   { name: "Webhook Tester", href: "/webhook-tester" },
   { name: "WebSocket Tester", href: "/websocket-tester" },
   { name: "Discord Embed Builder", href: "/discord-embed-builder" },
-  { name: "JWT Debugger" },
-  { name: "Cron Expression Builder" },
+  { name: "JWT Debugger", href: "/jwt-debugger" },
+  { name: "Cron Expression Builder", href: "/cron-expression-builder" },
   { name: "Pastebin" },
 ];
 
