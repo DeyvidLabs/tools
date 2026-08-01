@@ -50,6 +50,15 @@ export function sameRequestIds(a: CapturedRequest[], b: CapturedRequest[]): bool
   return a.length === b.length && a.every((r, i) => r.id === b[i]?.id);
 }
 
+// Spells out the month (dateStyle: "medium") instead of using digits, so
+// the date reads unambiguously regardless of whether the browser's locale
+// orders day/month as DD/MM or MM/DD.
+export function formatDate(iso: string): string {
+  return new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "medium" }).format(
+    new Date(iso),
+  );
+}
+
 export function formatRelativeTime(iso: string, now: number = Date.now()): string {
   const deltaMs = now - new Date(iso).getTime();
   const seconds = Math.round(deltaMs / 1000);

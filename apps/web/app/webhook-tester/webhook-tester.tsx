@@ -10,6 +10,7 @@ import {
   displayBody,
   fetchBin,
   fetchRequests,
+  formatDate,
   formatRelativeTime,
   sameRequestIds,
   type CapturedRequest,
@@ -136,7 +137,7 @@ export function WebhookTester() {
 
           <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
             <span>
-              {bin ? `Expires ${new Date(bin.expiresAt).toLocaleString()}` : ""}
+              {bin ? `Expires ${formatDate(bin.expiresAt)}` : ""}
             </span>
             <button
               type="button"

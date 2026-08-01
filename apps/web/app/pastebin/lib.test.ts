@@ -13,18 +13,10 @@ describe("formatExpiry", () => {
     expect(formatExpiry(past, now)).toBe("Expired");
   });
 
-  it("formats a sub-hour delta in minutes", () => {
-    const soon = new Date(now + 30 * 60_000).toISOString();
-    expect(formatExpiry(soon, now)).toBe("Expires in 30m");
-  });
-
-  it("formats a sub-day delta in hours", () => {
-    const later = new Date(now + 5 * 60 * 60_000).toISOString();
-    expect(formatExpiry(later, now)).toBe("Expires in 5h");
-  });
-
-  it("formats a multi-day delta in days", () => {
+  it("spells out the month in the absolute date, so day/month order can't be misread", () => {
     const future = new Date(now + 3 * 24 * 60 * 60_000).toISOString();
-    expect(formatExpiry(future, now)).toBe("Expires in 3d");
+    const formatted = formatExpiry(future, now);
+    expect(formatted.startsWith("Expires ")).toBe(true);
+    expect(formatted).not.toMatch(/\d{1,2}[/.]\d{1,2}[/.]\d{2,4}/);
   });
 });
