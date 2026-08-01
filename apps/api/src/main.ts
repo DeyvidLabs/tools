@@ -36,6 +36,11 @@ async function bootstrap(): Promise<void> {
     '/api/webhook/capture',
     bodyParser.raw({ type: () => true, limit: '256kb' }),
   );
+  // Paste content is capped at 256KB by CreatePasteDto's @MaxLength, but JSON
+  // string-escaping worst case (e.g. control bytes -> \uXXXX) can inflate the
+  // wire size well past that — this only raises the parser's ceiling, the DTO
+  // validator is what actually enforces the real limit.
+  app.use('/api/paste', bodyParser.json({ limit: '2mb' }));
   app.use(bodyParser.json());
   app.use(bodyParser.urlencoded({ extended: true }));
 
