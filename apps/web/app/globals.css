@@ -63,6 +63,34 @@ body {
   color: var(--foreground);
 }
 
+/* Themed scrollbar (Firefox + WebKit) so scrollable areas match the site
+   palette instead of the browser's default chrome. Applies globally since
+   any page can grow a scrollable area, not just this one. */
+* {
+  scrollbar-color: var(--border) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: var(--border);
+  border-radius: 999px;
+  border: 2px solid var(--background);
+  background-clip: padding-box;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: var(--muted-foreground);
+  background-clip: padding-box;
+}
+
 /* Grid background: static graph-paper lines, faded out toward the edges via
    a radial mask, with one restrained warm glow behind the hero. Everything
    here is static (no keyframes) — zero animation cost, GPU or not. */

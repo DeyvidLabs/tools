@@ -8,6 +8,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { WsAdapter } from '@nestjs/platform-ws';
 import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
 import compression from 'compression';
@@ -24,6 +25,9 @@ async function bootstrap(): Promise<void> {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     bodyParser: false,
   });
+  // Raw `ws`, not the Nest default (Socket.IO) — so any standard WebSocket
+  // client can connect to the ws-tester gateway, not just Socket.IO ones.
+  app.useWebSocketAdapter(new WsAdapter(app));
 
   // Path-scoped raw parser for the capture route: reads the body as a Buffer
   // regardless of Content-Type. Runs before the generic parsers below, so
