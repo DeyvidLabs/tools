@@ -14,6 +14,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
 import { PermissionModule } from './modules/permission/permission.module';
 import { WebhookModule } from './modules/webhook/webhook.module';
+import { WsTesterModule } from './modules/ws-tester/ws-tester.module';
 import { AuthGuard } from './common/guards/auth.guard';
 import { PermissionsGuard } from './common/guards/permissions.guard';
 import { AppController } from './app.controller';
@@ -57,6 +58,7 @@ import { AppController } from './app.controller';
     UserModule,
     PermissionModule,
     WebhookModule,
+    WsTesterModule,
     ScheduleModule.forRoot(),
     ThrottlerModule.forRoot({
       throttlers: [{ ttl: 60_000, limit: 100 }],

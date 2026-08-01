@@ -3,7 +3,7 @@ import Link from "next/link";
 const tools = [
   { name: "Password Generator", href: "/password-generator" },
   { name: "Webhook Tester", href: "/webhook-tester" },
-  { name: "WebSocket Tester" },
+  { name: "WebSocket Tester", href: "/websocket-tester" },
   { name: "Discord Embed Builder" },
   { name: "JWT Debugger" },
   { name: "Cron Expression Builder" },
