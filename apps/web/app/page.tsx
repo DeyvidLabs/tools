@@ -8,6 +8,7 @@ const tools = [
   { name: "JWT Debugger", href: "/jwt-debugger" },
   { name: "Cron Expression Builder", href: "/cron-expression-builder" },
   { name: "Pastebin", href: "/pastebin" },
+  { name: "ID Generator", href: "/id-generator" },
 ];
 
 export default function Home() {
