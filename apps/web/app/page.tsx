@@ -12,6 +12,7 @@ const tools = [
   { name: "Timestamp / Timezone Converter", href: "/timestamp-timezone-converter" },
   { name: "Encoder/Decoder", href: "/encoder-decoder" },
   { name: ".env Linter", href: "/dotenv-linter" },
+  { name: "Hash Generator", href: "/hash-generator" },
 ];
 
 export default function Home() {
