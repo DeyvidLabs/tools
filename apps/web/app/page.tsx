@@ -13,6 +13,7 @@ const tools = [
   { name: "Encoder/Decoder", href: "/encoder-decoder" },
   { name: ".env Linter", href: "/dotenv-linter" },
   { name: "Hash Generator", href: "/hash-generator" },
+  { name: "JSON Formatter / Validator / Diff", href: "/json-formatter-diff" },
 ];
 
 export default function Home() {
