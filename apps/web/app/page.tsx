@@ -10,6 +10,7 @@ const tools = [
   { name: "Pastebin", href: "/pastebin" },
   { name: "ID Generator", href: "/id-generator" },
   { name: "Timestamp / Timezone Converter", href: "/timestamp-timezone-converter" },
+  { name: "Encoder/Decoder", href: "/encoder-decoder" },
 ];
 
 export default function Home() {
