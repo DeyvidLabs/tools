@@ -11,6 +11,7 @@ const tools = [
   { name: "ID Generator", href: "/id-generator" },
   { name: "Timestamp / Timezone Converter", href: "/timestamp-timezone-converter" },
   { name: "Encoder/Decoder", href: "/encoder-decoder" },
+  { name: ".env Linter", href: "/dotenv-linter" },
 ];
 
 export default function Home() {
