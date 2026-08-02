@@ -15,6 +15,7 @@ const tools = [
   { name: "Hash Generator", href: "/hash-generator" },
   { name: "JSON Formatter / Validator / Diff", href: "/json-formatter-diff" },
   { name: "Regex Tester", href: "/regex-tester" },
+  { name: "Color Converter", href: "/color-converter" },
 ];
 
 export default function Home() {
