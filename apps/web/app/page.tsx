@@ -9,6 +9,7 @@ const tools = [
   { name: "Cron Expression Builder", href: "/cron-expression-builder" },
   { name: "Pastebin", href: "/pastebin" },
   { name: "ID Generator", href: "/id-generator" },
+  { name: "Timestamp / Timezone Converter", href: "/timestamp-timezone-converter" },
 ];
 
 export default function Home() {
