@@ -14,6 +14,7 @@ const tools = [
   { name: ".env Linter", href: "/dotenv-linter" },
   { name: "Hash Generator", href: "/hash-generator" },
   { name: "JSON Formatter / Validator / Diff", href: "/json-formatter-diff" },
+  { name: "Regex Tester", href: "/regex-tester" },
 ];
 
 export default function Home() {
