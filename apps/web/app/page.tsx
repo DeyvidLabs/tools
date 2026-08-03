@@ -18,6 +18,7 @@ const tools = [
   { name: "Color Converter", href: "/color-converter" },
   { name: "Subnet / CIDR Calculator", href: "/subnet-cidr-calculator" },
   { name: "HTTP Request Builder", href: "/http-request-builder" },
+  { name: "Fake Data Generator", href: "/fake-data-generator" },
 ];
 
 export default function Home() {
