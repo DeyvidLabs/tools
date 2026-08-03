@@ -58,6 +58,15 @@
   --font-mono: var(--font-geist-mono);
 }
 
+/* Reserves the vertical scrollbar's width up front instead of letting it
+   appear/disappear as page content grows or shrinks (e.g. a preview table
+   gaining rows) — without this, that toggle changes the viewport width and
+   re-centers any `items-center` layout, visibly shifting everything on the
+   page sideways. */
+html {
+  scrollbar-gutter: stable;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
