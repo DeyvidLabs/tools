@@ -17,6 +17,7 @@ const tools = [
   { name: "Regex Tester", href: "/regex-tester" },
   { name: "Color Converter", href: "/color-converter" },
   { name: "Subnet / CIDR Calculator", href: "/subnet-cidr-calculator" },
+  { name: "HTTP Request Builder", href: "/http-request-builder" },
 ];
 
 export default function Home() {
