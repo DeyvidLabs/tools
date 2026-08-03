@@ -16,6 +16,7 @@ const tools = [
   { name: "JSON Formatter / Validator / Diff", href: "/json-formatter-diff" },
   { name: "Regex Tester", href: "/regex-tester" },
   { name: "Color Converter", href: "/color-converter" },
+  { name: "Subnet / CIDR Calculator", href: "/subnet-cidr-calculator" },
 ];
 
 export default function Home() {
