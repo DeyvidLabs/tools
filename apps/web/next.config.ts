@@ -13,6 +13,9 @@ const nextConfig: NextConfig = {
       { source: "/health", destination: `${apiOrigin}/health` },
       { source: "/docs", destination: `${apiOrigin}/docs` },
       { source: "/docs/:path*", destination: `${apiOrigin}/docs/:path*` },
+      // Short-link redirects (url-shortener): served by the API's
+      // GET /api/s/:code, but exposed to visitors at the shorter /s/:code.
+      { source: "/s/:code", destination: `${apiOrigin}/api/s/:code` },
     ];
   },
 };

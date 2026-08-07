@@ -11,11 +11,13 @@ import { Permission } from './common/entities/permission.entity';
 import { WebhookBin } from './common/entities/webhook-bin.entity';
 import { WebhookRequest } from './common/entities/webhook-request.entity';
 import { Paste } from './common/entities/paste.entity';
+import { ShortLink } from './common/entities/short-link.entity';
 import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
 import { PermissionModule } from './modules/permission/permission.module';
 import { WebhookModule } from './modules/webhook/webhook.module';
 import { PasteModule } from './modules/paste/paste.module';
+import { UrlShortenerModule } from './modules/url-shortener/url-shortener.module';
 import { WsTesterModule } from './modules/ws-tester/ws-tester.module';
 import { AuthGuard } from './common/guards/auth.guard';
 import { PermissionsGuard } from './common/guards/permissions.guard';
@@ -43,6 +45,7 @@ import { AppController } from './app.controller';
         GOOGLE_CALLBACK_URL: Joi.string().optional().allow(''),
         WEBHOOK_BIN_TTL_HOURS: Joi.number().positive().default(24),
         PASTE_ADMIN_TOKEN: Joi.string().optional().allow(''),
+        URL_SHORTENER_ADMIN_TOKEN: Joi.string().optional().allow(''),
       }),
       validationOptions: { allowUnknown: true, abortEarly: true },
     }),
@@ -52,7 +55,7 @@ import { AppController } from './app.controller';
       useFactory: (configService: ConfigService) => ({
         type: 'postgres',
         url: configService.get<string>('DATABASE_URL'),
-        entities: [User, Permission, WebhookBin, WebhookRequest, Paste],
+        entities: [User, Permission, WebhookBin, WebhookRequest, Paste, ShortLink],
         synchronize: configService.get<string>('NODE_ENV') === 'development',
         logging: configService.get<string>('NODE_ENV') === 'development',
       }),
@@ -62,6 +65,7 @@ import { AppController } from './app.controller';
     PermissionModule,
     WebhookModule,
     PasteModule,
+    UrlShortenerModule,
     WsTesterModule,
     ScheduleModule.forRoot(),
     ThrottlerModule.forRoot({
