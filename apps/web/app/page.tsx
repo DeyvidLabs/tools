@@ -20,6 +20,7 @@ const tools = [
   { name: "HTTP Request Builder", href: "/http-request-builder" },
   { name: "Fake Data Generator", href: "/fake-data-generator" },
   { name: "URL Shortener", href: "/url-shortener" },
+  { name: "API Mock / Sandbox Endpoint", href: "/mock-endpoint" },
 ];
 
 export default function Home() {
