@@ -19,6 +19,7 @@ const tools = [
   { name: "Subnet / CIDR Calculator", href: "/subnet-cidr-calculator" },
   { name: "HTTP Request Builder", href: "/http-request-builder" },
   { name: "Fake Data Generator", href: "/fake-data-generator" },
+  { name: "URL Shortener", href: "/url-shortener" },
 ];
 
 export default function Home() {
