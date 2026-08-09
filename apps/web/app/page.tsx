@@ -23,6 +23,7 @@ const tools = [
   { name: "API Mock / Sandbox Endpoint", href: "/mock-endpoint" },
   { name: "ANSI / Terminal Color Previewer", href: "/ansi-color-previewer" },
   { name: "Markdown Live Previewer", href: "/markdown-previewer" },
+  { name: "QR Code Generator / Reader", href: "/qr-code-generator-reader" },
 ];
 
 export default function Home() {
