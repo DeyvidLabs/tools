@@ -21,6 +21,7 @@ const tools = [
   { name: "Fake Data Generator", href: "/fake-data-generator" },
   { name: "URL Shortener", href: "/url-shortener" },
   { name: "API Mock / Sandbox Endpoint", href: "/mock-endpoint" },
+  { name: "ANSI / Terminal Color Previewer", href: "/ansi-color-previewer" },
 ];
 
 export default function Home() {
