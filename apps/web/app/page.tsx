@@ -22,6 +22,7 @@ const tools = [
   { name: "URL Shortener", href: "/url-shortener" },
   { name: "API Mock / Sandbox Endpoint", href: "/mock-endpoint" },
   { name: "ANSI / Terminal Color Previewer", href: "/ansi-color-previewer" },
+  { name: "Markdown Live Previewer", href: "/markdown-previewer" },
 ];
 
 export default function Home() {
