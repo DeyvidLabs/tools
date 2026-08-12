@@ -24,6 +24,7 @@ const tools = [
   { name: "ANSI / Terminal Color Previewer", href: "/ansi-color-previewer" },
   { name: "Markdown Live Previewer", href: "/markdown-previewer" },
   { name: "QR Code Generator / Reader", href: "/qr-code-generator-reader" },
+  { name: "CSS Gradient / Box-Shadow / Clip-Path Generator", href: "/css-shape-generator" },
 ];
 
 export default function Home() {
