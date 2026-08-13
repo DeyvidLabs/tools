@@ -27,6 +27,7 @@ const tools = [
   { name: "CSS Gradient / Box-Shadow / Clip-Path Generator", href: "/css-shape-generator" },
   { name: "CSV / JSON / YAML Converter", href: "/csv-json-yaml-converter" },
   { name: "SQL Formatter / Minifier", href: "/sql-formatter" },
+  { name: "JSON to TypeScript / Zod Schema Generator", href: "/json-to-ts-zod" },
 ];
 
 export default function Home() {
