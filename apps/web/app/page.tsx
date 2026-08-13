@@ -25,6 +25,7 @@ const tools = [
   { name: "Markdown Live Previewer", href: "/markdown-previewer" },
   { name: "QR Code Generator / Reader", href: "/qr-code-generator-reader" },
   { name: "CSS Gradient / Box-Shadow / Clip-Path Generator", href: "/css-shape-generator" },
+  { name: "CSV / JSON / YAML Converter", href: "/csv-json-yaml-converter" },
 ];
 
 export default function Home() {
