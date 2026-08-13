@@ -26,6 +26,7 @@ const tools = [
   { name: "QR Code Generator / Reader", href: "/qr-code-generator-reader" },
   { name: "CSS Gradient / Box-Shadow / Clip-Path Generator", href: "/css-shape-generator" },
   { name: "CSV / JSON / YAML Converter", href: "/csv-json-yaml-converter" },
+  { name: "SQL Formatter / Minifier", href: "/sql-formatter" },
 ];
 
 export default function Home() {
