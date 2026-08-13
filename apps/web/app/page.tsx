@@ -45,7 +45,18 @@ export default function Home() {
               <Link
                 key={tool.name}
                 href={tool.href}
-                className="group rounded-lg border border-border bg-card/70 p-5 backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-[0_8px_24px_-12px_var(--primary)]"
+                // prefetch={false}: by default next/link prefetches a route's
+                // RSC payload + JS chunk as soon as the link scrolls into
+                // view. With ~two dozen links on this page, that fires a
+                // burst of fetches/parsing on every scroll, competing with
+                // the main thread and causing dropped frames — not worth it
+                // for a browse page where only one link actually gets clicked.
+                prefetch={false}
+                // No backdrop-blur here (see webhook-tester's RequestRow for the
+                // same fix): this renders once per tool card, and backdrop-filter
+                // forces a per-frame repaint on scroll — fine for a single static
+                // card, not for a couple dozen of them in a grid.
+                className="group rounded-lg border border-border bg-card/70 p-5 transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-[0_8px_24px_-12px_var(--primary)]"
               >
                 <span className="font-medium text-card-foreground transition-colors group-hover:text-primary">
                   {tool.name}
