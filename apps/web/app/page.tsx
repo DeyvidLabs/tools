@@ -1,84 +1,76 @@
 import Link from "next/link";
-
-const tools = [
-  { name: "Password Generator", href: "/password-generator" },
-  { name: "Webhook Tester", href: "/webhook-tester" },
-  { name: "WebSocket Tester", href: "/websocket-tester" },
-  { name: "Discord Embed Builder", href: "/discord-embed-builder" },
-  { name: "JWT Debugger", href: "/jwt-debugger" },
-  { name: "Cron Expression Builder", href: "/cron-expression-builder" },
-  { name: "Pastebin", href: "/pastebin" },
-  { name: "ID Generator", href: "/id-generator" },
-  { name: "Timestamp / Timezone Converter", href: "/timestamp-timezone-converter" },
-  { name: "Encoder/Decoder", href: "/encoder-decoder" },
-  { name: ".env Linter", href: "/dotenv-linter" },
-  { name: "Hash Generator", href: "/hash-generator" },
-  { name: "JSON Formatter / Validator / Diff", href: "/json-formatter-diff" },
-  { name: "Regex Tester", href: "/regex-tester" },
-  { name: "Color Converter", href: "/color-converter" },
-  { name: "Subnet / CIDR Calculator", href: "/subnet-cidr-calculator" },
-  { name: "HTTP Request Builder", href: "/http-request-builder" },
-  { name: "Fake Data Generator", href: "/fake-data-generator" },
-  { name: "URL Shortener", href: "/url-shortener" },
-  { name: "API Mock / Sandbox Endpoint", href: "/mock-endpoint" },
-  { name: "ANSI / Terminal Color Previewer", href: "/ansi-color-previewer" },
-  { name: "Markdown Live Previewer", href: "/markdown-previewer" },
-  { name: "QR Code Generator / Reader", href: "/qr-code-generator-reader" },
-  { name: "CSS Gradient / Box-Shadow / Clip-Path Generator", href: "/css-shape-generator" },
-  { name: "CSV / JSON / YAML Converter", href: "/csv-json-yaml-converter" },
-  { name: "SQL Formatter / Minifier", href: "/sql-formatter" },
-  { name: "JSON to TypeScript / Zod Schema Generator", href: "/json-to-ts-zod" },
-];
+import { categories, toolCount } from "@/lib/tools-data";
 
 export default function Home() {
   return (
-    <div className="flex flex-1 flex-col items-center px-6 py-10">
-      <div className="w-full max-w-4xl">
-        <h1 className="text-3xl font-semibold tracking-tight text-foreground">
-          Tools
-        </h1>
-        <p className="mt-2 text-muted-foreground">
-          A collection of self-contained dev tools. Most run entirely in your browser.
-        </p>
+    <div className="flex flex-1 flex-col items-center px-6 py-10 sm:py-14">
+      <div className="w-full max-w-5xl">
+        <div className="flex flex-col items-center text-center">
+          <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card/70 px-3 py-1 text-xs text-muted-foreground">
+            <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+            {toolCount} tools · runs entirely in your browser
+          </span>
 
-        <div className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
-          {tools.map((tool) =>
-            tool.href ? (
-              <Link
-                key={tool.name}
-                href={tool.href}
-                // prefetch={false}: by default next/link prefetches a route's
-                // RSC payload + JS chunk as soon as the link scrolls into
-                // view. With ~two dozen links on this page, that fires a
-                // burst of fetches/parsing on every scroll, competing with
-                // the main thread and causing dropped frames — not worth it
-                // for a browse page where only one link actually gets clicked.
-                prefetch={false}
-                // No backdrop-blur here (see webhook-tester's RequestRow for the
-                // same fix): this renders once per tool card, and backdrop-filter
-                // forces a per-frame repaint on scroll — fine for a single static
-                // card, not for a couple dozen of them in a grid.
-                className="group rounded-lg border border-border bg-card/70 p-5 transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-[0_8px_24px_-12px_var(--primary)]"
-              >
-                <span className="font-medium text-card-foreground transition-colors group-hover:text-primary">
-                  {tool.name}
+          <h1 className="mt-5 text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
+            Dev tools, without the tab hoarding.
+          </h1>
+          <p className="mt-4 max-w-xl text-balance text-muted-foreground">
+            A self-hosted collection of everyday developer utilities — formatters,
+            generators, and testers. No signup, no tracking, most of it never
+            leaves your browser.
+          </p>
+        </div>
+
+        <div className="mt-14 flex flex-col gap-12">
+          {categories.map((category) => (
+            <section key={category.name}>
+              <div className="mb-4 flex items-center gap-2.5">
+                <span
+                  className="flex h-8 w-8 items-center justify-center rounded-md"
+                  style={{
+                    color: category.color,
+                    backgroundColor: `color-mix(in srgb, ${category.color} 15%, transparent)`,
+                  }}
+                >
+                  {category.icon}
                 </span>
-              </Link>
-            ) : (
-              <div
-                key={tool.name}
-                aria-disabled="true"
-                className="rounded-lg border border-border bg-card/70 p-5 opacity-50"
-              >
-                <span className="font-medium text-card-foreground">
-                  {tool.name}
-                </span>
-                <span className="ml-2 text-xs text-muted-foreground">
-                  soon
+                <h2 className="text-lg font-semibold tracking-tight text-foreground">
+                  {category.name}
+                </h2>
+                <span className="text-sm text-muted-foreground">
+                  {category.tools.length}
                 </span>
               </div>
-            ),
-          )}
+
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {category.tools.map((tool) => (
+                  <Link
+                    key={tool.name}
+                    href={tool.href}
+                    // prefetch={false}: by default next/link prefetches a route's
+                    // RSC payload + JS chunk as soon as the link scrolls into
+                    // view. With ~two dozen links on this page, that fires a
+                    // burst of fetches/parsing on every scroll, competing with
+                    // the main thread and causing dropped frames — not worth it
+                    // for a browse page where only one link actually gets clicked.
+                    prefetch={false}
+                    // No backdrop-blur here (see webhook-tester's RequestRow for the
+                    // same fix): this renders once per tool card, and backdrop-filter
+                    // forces a per-frame repaint on scroll — fine for a single static
+                    // card, not for a couple dozen of them in a grid.
+                    className="group rounded-lg border border-border bg-card/70 p-5 transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-[0_8px_24px_-12px_var(--primary)]"
+                  >
+                    <span className="font-medium text-card-foreground transition-colors group-hover:text-primary">
+                      {tool.name}
+                    </span>
+                    <p className="mt-1.5 text-sm text-muted-foreground">
+                      {tool.description}
+                    </p>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          ))}
         </div>
       </div>
     </div>
