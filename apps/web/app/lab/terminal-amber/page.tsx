@@ -27,7 +27,7 @@ export default function TerminalAmberVariant() {
           </p>
 
           <div className="mt-10 flex flex-col gap-8">
-            {categories.map((category, ci) => (
+            {categories.map((category) => (
               <div key={category.name}>
                 <p className="text-sm text-[#8a6a30]">
                   $ ls ./{category.name.toLowerCase().replace(/[^a-z]+/g, "-")}/
