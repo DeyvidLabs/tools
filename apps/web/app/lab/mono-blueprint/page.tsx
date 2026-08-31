@@ -29,7 +29,7 @@ export default function MonoBlueprintVariant() {
       />
 
       <header className="relative z-10 flex items-center justify-between border-b border-[#16324a] px-8 py-5 text-xs uppercase tracking-widest">
-        <span className="text-[#4fd1ff]">// tools.sys</span>
+        <span className="text-[#4fd1ff]">{"// tools.sys"}</span>
         <a href="https://github.com/DeyvidLabs/tools" className="text-[#5c7d94] hover:text-[#bcd4e6]">
           view-source
         </a>
