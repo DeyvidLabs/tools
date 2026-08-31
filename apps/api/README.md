@@ -1,16 +1,19 @@
-# NestJS Auth Backend
+# Tools API
 
-A production-ready authentication backend built with **NestJS 11**, **TypeORM**, and **PostgreSQL**.
+The NestJS backend for [tools.deyvid.dev](https://tools.deyvid.dev) — a self-hosted collection of dev tools that are **client-side by default**. This app only exists for the handful of tools that genuinely need server-side state: a webhook bin, a paste store, a URL shortener, a mock endpoint, and a WebSocket echo/relay.
+
+**There are no user accounts.** Every endpoint is public — nothing here authenticates a request, stores a profile, or retains any personal data beyond what a tool needs to do its one job (and only for that tool's TTL).
 
 ## Features
 
-- JWT authentication with automatic refresh-token rotation
-- Google OAuth2 via Passport.js
-- Role-based access control (RBAC) with a flexible `@Permissions()` decorator
+- Webhook bin capture + inspection, with TTL-based expiry
+- Pastebin with optional one-time delete token
+- Self-hosted URL shortener
+- Configurable mock/sandbox HTTP endpoint
+- Raw WebSocket echo/relay tester (solo or shared room)
 - PostgreSQL + TypeORM with migration support
-- Helmet security headers, rate limiting, global validation
+- Helmet security headers, per-IP rate limiting, global validation
 - Swagger/OpenAPI documentation
-- Full unit and e2e test suite (Jest + Supertest)
 
 ---
 
@@ -21,8 +24,6 @@ A production-ready authentication backend built with **NestJS 11**, **TypeORM**,
 | Framework | NestJS 11 |
 | ORM | TypeORM 0.3 |
 | Database | PostgreSQL 17 |
-| Auth | JWT + Passport (local + Google OAuth2) |
-| Hashing | bcrypt (10 rounds) |
 | Validation | class-validator + class-transformer |
 | Docs | Swagger / OpenAPI |
 | Testing | Jest + Supertest |
@@ -33,22 +34,19 @@ A production-ready authentication backend built with **NestJS 11**, **TypeORM**,
 
 ```
 ├── database/
-│   ├── migrations/          # TypeORM migrations
-│   └── seeds/               # Database seeders
-├── scripts/
-│   └── test-api.sh          # cURL integration tests
+│   └── migrations/          # TypeORM migrations
 ├── src/
 │   ├── common/
-│   │   ├── decorators/      # @Public(), @Permissions()
-│   │   ├── dto/             # Shared DTOs
-│   │   ├── entities/        # TypeORM entities (User, Permission)
-│   │   ├── filters/         # Global HTTP exception filter
-│   │   └── guards/          # AuthGuard, PermissionsGuard, GoogleOAuthGuard
+│   │   ├── dto/              # Shared DTOs
+│   │   ├── entities/         # TypeORM entities (WebhookBin, Paste, ShortLink, MockEndpoint, ...)
+│   │   ├── filters/          # Global HTTP exception filter
+│   │   └── interceptors/
 │   ├── modules/
-│   │   ├── auth/            # JWT + Google OAuth, AuthService, AuthController
-│   │   │   └── strategies/  # GoogleStrategy
-│   │   ├── permission/      # Permission CRUD
-│   │   └── user/            # User profile endpoint
+│   │   ├── webhook/           # Webhook bin capture + inspection
+│   │   ├── paste/              # Pastebin
+│   │   ├── url-shortener/       # URL shortener
+│   │   ├── mock-endpoint/        # Configurable mock/sandbox endpoint
+│   │   └── ws-tester/             # WebSocket echo/relay gateway
 │   ├── app.module.ts
 │   └── main.ts
 ├── test/                    # e2e test suites
@@ -77,7 +75,7 @@ yarn install
 
 ```bash
 cp .env.sample .env
-# Edit .env — set JWT_SECRET, REFRESH_TOKEN_SECRET, and verify DATABASE_URL
+# Edit .env — verify DATABASE_URL, and set PASTE_ADMIN_TOKEN / URL_SHORTENER_ADMIN_TOKEN if you want them
 ```
 
 ### 4. Run migrations
@@ -92,22 +90,7 @@ yarn migration:run
 
 In development, `synchronize: true` is active so the schema is auto-synced without migrations.
 
-### 5. Seed the database
-
-```bash
-# Creates default permissions (ADMIN, USER, MODERATOR) + an admin user
-yarn seed --email admin@example.com --password MySecurePass! --permission ADMIN
-
-# Google-only user (no password):
-yarn seed --email admin@example.com --permission ADMIN
-
-# Multiple permissions:
-yarn seed --email admin@example.com --password MyPass! --permission ADMIN,MODERATOR
-```
-
-> **Note:** If you rename the `USER` permission in the seeder, update `auth.controller.ts` accordingly.
-
-### 6. Start the server
+### 5. Start the server
 
 ```bash
 # Development (watch mode)
@@ -121,124 +104,56 @@ Swagger UI is available at `http://localhost:5000/docs`.
 
 ---
 
-## Google OAuth2 Setup
-
-1. Go to [Google Cloud Console](https://console.cloud.google.com/).
-2. Create a project → **APIs & Services → OAuth consent screen** → External.
-3. **APIs & Services → Credentials → Create Credentials → OAuth client ID** (Web application).
-4. Add `http://localhost:5000/api/auth/google/callback` to **Authorized redirect URIs**.
-5. Copy the Client ID and Client Secret to your `.env`:
-
-```env
-GOOGLE_CLIENT_ID=your-client-id
-GOOGLE_CLIENT_SECRET=your-client-secret
-GOOGLE_CALLBACK_URL=http://localhost:5000/api/auth/google/callback
-```
-
----
-
 ## API Endpoints
 
-All routes below sit behind the global `/api` prefix (see [Project Structure](#project-structure)) — the only exception is `/health`.
+All routes below sit behind the global `/api` prefix — the only exception is `/health`. Every route is public.
 
-### Auth (`/api/auth`)
+### Webhook tester (`/api/webhook`)
 
-| Method | Path | Description | Auth |
-|--------|------|-------------|------|
-| POST | `/api/auth/register` | Register with email + password | Public |
-| POST | `/api/auth/login` | Login with email + password | Public |
-| POST | `/api/auth/logout` | Clear auth cookies | Public |
-| POST | `/api/auth/logout-all` | Revoke all sessions (bumps `tokenVersion`) | JWT |
-| GET | `/api/auth/validate` | Validate / refresh tokens | Public |
-| GET | `/api/auth/google` | Initiate Google OAuth | Public |
-| GET | `/api/auth/google/callback` | Google OAuth callback | Public |
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/api/webhook/bins` | Create a new webhook bin |
+| GET | `/api/webhook/bins/:id` | Get a bin's info |
+| GET | `/api/webhook/bins/:id/requests` | List captured requests for a bin |
+| ANY | `/api/webhook/capture/:id` | Capture endpoint — any method/body lands here |
 
-### User (`/api/user`)
+### Pastebin (`/api/paste`)
 
-| Method | Path | Description | Auth |
-|--------|------|-------------|------|
-| GET | `/api/user/me` | Get current user profile | JWT |
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/api/paste` | Create a paste |
+| GET | `/api/paste/:id` | Read a paste |
+| DELETE | `/api/paste/:id` | Delete a paste using its one-time delete token |
 
-### Permission (`/api/permission`)
+### URL shortener
 
-| Method | Path | Description | Auth |
-|--------|------|-------------|------|
-| GET | `/api/permission` | List all permissions | ADMIN |
-| POST | `/api/permission` | Create a permission | ADMIN |
-| PUT | `/api/permission/:id` | Update a permission | ADMIN |
-| DELETE | `/api/permission/:id` | Delete a permission | ADMIN |
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/api/shorten` | Create a short link |
+| GET | `/api/shorten/:code` | Get a short link's info |
+| DELETE | `/api/shorten/:code` | Delete a short link |
+| GET | `/api/s/:code` | Redirect to the original URL |
+
+### Mock endpoint (`/api/mock`)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/api/mock/endpoints` | Create a mock endpoint (status, body, headers, delay) |
+| GET | `/api/mock/endpoints/:id` | Get a mock endpoint's config |
+| DELETE | `/api/mock/endpoints/:id` | Delete a mock endpoint |
+| ANY | `/api/mock/hit/:id` | Hit the mock endpoint — responds with its configured status/body/headers/delay |
+
+### WebSocket tester
+
+| Path | Description |
+|------|-------------|
+| `/api/ws-tester` | Raw WebSocket echo/relay gateway (solo or shared room via query param) |
 
 ### Health
 
-| Method | Path | Description | Auth |
-|--------|------|-------------|------|
-| GET | `/health` | Health check | Public |
-
----
-
-## Decorators
-
-### `@Public()`
-
-Marks a route or controller as publicly accessible (skips `AuthGuard`).
-
-```typescript
-@Controller('auth')
-@Public()
-export class AuthController {}
-```
-
-### `@Permissions(...)`
-
-Restricts access based on user permissions. Supports AND/OR/wildcard logic.
-
-```typescript
-// OR — requires EDIT or DELETE
-@Permissions('EDIT', 'DELETE')
-
-// AND — requires both READ and WRITE
-@Permissions(['READ', 'WRITE'])
-
-// Combined — (READ AND WRITE) OR ADMIN
-@Permissions(['READ', 'WRITE'], 'ADMIN')
-
-// Wildcard — any permission matching MANAGE_*
-@Permissions('MANAGE_*')
-```
-
-> Permissions are case-insensitive. Users with `ADMIN` bypass all permission checks.
-
----
-
-## Guards
-
-### `AuthGuard` (global)
-
-- Checks `Authorization: Bearer <token>` header or `access_token` cookie.
-- On `TokenExpiredError`, automatically refreshes via `refresh_token` cookie.
-- Returns `401 Unauthorized` if both tokens are absent or invalid.
-
-### `PermissionsGuard` (global)
-
-- Reads required permissions from the `@Permissions()` decorator.
-- Queries the user's permissions from the database.
-- Returns `403 Forbidden` if the user lacks the required permissions.
-- `ADMIN` permission bypasses all checks.
-
-### `ThrottlerGuard` (global)
-
-Rate limiting: 100 requests per 60 seconds per IP.
-
----
-
-## Token Strategy
-
-| Token | Storage | Expiry (default) | httpOnly |
-|-------|---------|-----------------|---------|
-| Access token | `access_token` cookie | 15 minutes | Yes |
-| Refresh token | `refresh_token` cookie | 7 days | Yes |
-
-Tokens are automatically rotated on each refresh. Cookies get the `secure` flag automatically when `NODE_ENV=production`.
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/health` | Health check |
 
 ---
 
@@ -255,23 +170,13 @@ yarn test:cov
 yarn test:e2e
 ```
 
-### Manual cURL Tests
-
-```bash
-# Start the server first, then:
-./scripts/test-api.sh
-
-# Custom host:
-./scripts/test-api.sh http://localhost:5000
-```
-
 ---
 
 ## Migrations
 
 ```bash
 # Generate a new migration after changing entities
-yarn migration:generate src/database/migrations/CreateUsersTable
+yarn migration:generate src/database/migrations/<MigrationName>
 
 # Apply pending migrations
 yarn migration:run
@@ -289,7 +194,7 @@ yarn migration:show
 
 The app is meant to run behind a reverse proxy (nginx, Caddy, Traefik...) that terminates TLS. It already trusts the first proxy hop (`app.set('trust proxy', 1)` in `main.ts`), so `req.ip` and the `ThrottlerGuard`'s per-IP rate limiting still work correctly instead of bucketing every client under the proxy's IP.
 
-Both examples below forward the request path unchanged (no rewriting) — since the app already expects everything under `/api` (see [API Endpoints](#api-endpoints)), that's the config with the least room for surprises. This means on the dedicated subdomain the path still includes `/api`, e.g. `api.example.com/api/auth/login`, not `api.example.com/auth/login`. You can run either setup alone or both at once against the same backend.
+Both examples below forward the request path unchanged (no rewriting) — since the app already expects everything under `/api` (see [API Endpoints](#api-endpoints)), that's the config with the least room for surprises. This means on the dedicated subdomain the path still includes `/api`, e.g. `api.example.com/api/paste`, not `api.example.com/paste`. You can run either setup alone or both at once against the same backend.
 
 <details>
 <summary>Example nginx / Caddy config</summary>
@@ -297,7 +202,7 @@ Both examples below forward the request path unchanged (no rewriting) — since 
 **nginx**
 
 ```nginx
-# Option 1: dedicated subdomain — api.example.com/api/auth/login
+# Option 1: dedicated subdomain — api.example.com/api/paste
 server {
     listen 443 ssl http2;
     server_name api.example.com;
@@ -312,11 +217,10 @@ server {
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_cookie_path / /;
     }
 }
 
-# Option 2: same domain as the frontend, under /api — example.com/api/auth/login
+# Option 2: same domain as the frontend, under /api — example.com/api/paste
 server {
     listen 443 ssl http2;
     server_name example.com;
@@ -331,11 +235,15 @@ server {
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_cookie_path / /;
     }
 
     location /health {
         proxy_pass http://127.0.0.1:5000/health;
+        proxy_set_header Host $host;
+    }
+
+    location /docs {
+        proxy_pass http://127.0.0.1:5000/docs;
         proxy_set_header Host $host;
     }
 
@@ -346,12 +254,12 @@ server {
 **Caddy**
 
 ```caddyfile
-# Option 1: dedicated subdomain — api.example.com/api/auth/login
+# Option 1: dedicated subdomain — api.example.com/api/paste
 api.example.com {
     reverse_proxy 127.0.0.1:5000
 }
 
-# Option 2: same domain as the frontend, under /api — example.com/api/auth/login
+# Option 2: same domain as the frontend, under /api — example.com/api/paste
 example.com {
     handle /api/* {
         reverse_proxy 127.0.0.1:5000
@@ -361,13 +269,17 @@ example.com {
         reverse_proxy 127.0.0.1:5000
     }
 
+    handle /docs {
+        reverse_proxy 127.0.0.1:5000
+    }
+
     # ... rest of the site (frontend, etc.)
 }
 ```
 
 `/health` and `/docs` sit outside the `/api` prefix (see [API Endpoints](#api-endpoints)), so on the path-based setup they need their own `location`/`handle` block to be reachable from the main domain — otherwise they're only reachable through the dedicated subdomain.
 
-Set `NODE_ENV=production` so the auth cookies get the `secure` flag, and set `CORS_ORIGIN` to the exact origin(s) serving the frontend — `credentials: true` cookies don't work with a wildcard origin.
+Set `CORS_ORIGIN` to the exact origin(s) serving the frontend, or `*` if that doesn't matter for your deployment.
 
 </details>
 

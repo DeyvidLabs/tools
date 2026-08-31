@@ -16,7 +16,6 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { Request } from 'express';
-import { Public } from '../../common/decorators/public.decorator';
 import { WebhookBin } from '../../common/entities/webhook-bin.entity';
 import { WebhookRequest } from '../../common/entities/webhook-request.entity';
 import { WebhookBinDto, WebhookRequestDto } from '../../common/dto/webhook.dto';
@@ -27,7 +26,6 @@ import { WebhookService } from './webhook.service';
 export class WebhookController {
   constructor(private readonly webhookService: WebhookService) {}
 
-  @Public()
   @Post('bins')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create a new webhook bin' })
@@ -36,7 +34,6 @@ export class WebhookController {
     return this.webhookService.createBin();
   }
 
-  @Public()
   @Get('bins/:id')
   @ApiOperation({ summary: 'Fetch a webhook bin (404 if missing or expired)' })
   @ApiOkResponse({ description: 'Bin found', type: WebhookBinDto })
@@ -44,7 +41,6 @@ export class WebhookController {
     return this.webhookService.getBin(id);
   }
 
-  @Public()
   @Get('bins/:id/requests')
   @ApiOperation({ summary: 'List requests captured by a bin, newest first' })
   @ApiOkResponse({
@@ -57,7 +53,6 @@ export class WebhookController {
     return this.webhookService.listRequests(id);
   }
 
-  @Public()
   @All('capture/:id')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({

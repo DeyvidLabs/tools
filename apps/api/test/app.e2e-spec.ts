@@ -8,16 +8,11 @@
  */
 
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication, CanActivate } from '@nestjs/common';
-import request from 'supertest';
+import { INestApplication } from '@nestjs/common';
 import { DataSource } from 'typeorm';
-import { getRepositoryToken } from '@nestjs/typeorm';
-import { AppModule } from './../src/app.module';
-import { User } from './../src/common/entities/user.entity';
-import { Permission } from './../src/common/entities/permission.entity';
-import { AuthGuard } from './../src/common/guards/auth.guard';
-import { PermissionsGuard } from './../src/common/guards/permissions.guard';
 import { ThrottlerGuard } from '@nestjs/throttler';
+import { AppModule } from './../src/app.module';
+import { req } from './utils/http';
 
 describe('AppModule bootstrap (e2e)', () => {
   let app: INestApplication;
@@ -31,28 +26,6 @@ describe('AppModule bootstrap (e2e)', () => {
         initialize: jest.fn().mockResolvedValue(undefined),
         destroy: jest.fn().mockResolvedValue(undefined),
       })
-      .overrideProvider(getRepositoryToken(User))
-      .useValue({
-        findOne: jest.fn(),
-        find: jest.fn(),
-        save: jest.fn(),
-        create: jest.fn(),
-        delete: jest.fn(),
-        update: jest.fn(),
-      })
-      .overrideProvider(getRepositoryToken(Permission))
-      .useValue({
-        findOne: jest.fn(),
-        find: jest.fn(),
-        save: jest.fn(),
-        create: jest.fn(),
-        delete: jest.fn(),
-        update: jest.fn(),
-      })
-      .overrideProvider(AuthGuard)
-      .useValue({ canActivate: () => true })
-      .overrideProvider(PermissionsGuard)
-      .useValue({ canActivate: () => true })
       .overrideProvider(ThrottlerGuard)
       .useValue({ canActivate: () => true })
       .compile();
@@ -67,10 +40,10 @@ describe('AppModule bootstrap (e2e)', () => {
   });
 
   it('should start and respond to /health with 200', async () => {
-    await request(app.getHttpServer()).get('/health').expect(200);
+    await req(app).get('/health').expect(200);
   });
 
   it('should respond to unknown routes with 404 (not 500)', async () => {
-    await request(app.getHttpServer()).get('/non-existent-route').expect(404);
+    await req(app).get('/non-existent-route').expect(404);
   });
 });
