@@ -4,9 +4,10 @@ packages:
 allowBuilds:
   '@scarf/scarf': true
   '@swc/core': true
-  bcrypt: true
   sharp: true
   unrs-resolver: true
+minimumReleaseAgeExclude:
+  - eslint-plugin-jest@29.16.2
 overrides:
   # migrated from apps/api's yarn "resolutions" (security pins for transitive deps) —
   # pnpm ignores "resolutions" entirely, so these need to live here instead.

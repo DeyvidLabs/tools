@@ -10,7 +10,6 @@ import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { WsAdapter } from '@nestjs/platform-ws';
 import bodyParser from 'body-parser';
-import cookieParser from 'cookie-parser';
 import compression from 'compression';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
@@ -65,10 +64,8 @@ async function bootstrap(): Promise<void> {
         configService.get<string>('NODE_ENV') === 'production',
     }),
   );
-  app.use(cookieParser());
   app.enableCors({
     origin: corsOrigins.length === 1 ? corsOrigins[0] : corsOrigins,
-    credentials: true,
   });
 
   app.useGlobalPipes(
@@ -85,16 +82,11 @@ async function bootstrap(): Promise<void> {
   );
 
   const swaggerConfig = new DocumentBuilder()
-    .setTitle('NestJS Auth & Roles')
+    .setTitle('Tools API')
     .setDescription(
-      'Authentication backend with JWT, refresh token rotation, RBAC, and Google OAuth2.',
+      'Self-hosted backend for the tools.deyvid.dev testers that need server-side state (webhook tester, pastebin, URL shortener, mock endpoint, WebSocket tester). Every endpoint is public — there are no user accounts.',
     )
     .setVersion('1.0')
-    .addBearerAuth(
-      { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
-      'Bearer token',
-    )
-    .addCookieAuth('access_token')
     .build();
 
   SwaggerModule.setup('docs', app, () =>
@@ -106,4 +98,4 @@ async function bootstrap(): Promise<void> {
   logger.log(`Swagger docs available at http://localhost:${port}/docs`);
 }
 
-bootstrap();
+void bootstrap();
