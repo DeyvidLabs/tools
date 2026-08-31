@@ -20,7 +20,6 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { Public } from '../../common/decorators/public.decorator';
 import { MockEndpoint } from '../../common/entities/mock-endpoint.entity';
 import {
   CreateMockEndpointDto,
@@ -39,7 +38,6 @@ function sleep(ms: number): Promise<void> {
 export class MockEndpointController {
   constructor(private readonly mockEndpointService: MockEndpointService) {}
 
-  @Public()
   @Post('endpoints')
   @Throttle({ default: { limit: 10, ttl: 60_000 } })
   @HttpCode(HttpStatus.CREATED)
@@ -49,7 +47,6 @@ export class MockEndpointController {
     return this.mockEndpointService.createEndpoint(dto);
   }
 
-  @Public()
   @Get('endpoints/:id')
   @ApiOperation({ summary: 'Fetch a mock endpoint config (404 if missing or expired)' })
   @ApiOkResponse({ description: 'Mock endpoint found', type: MockEndpointDto })
@@ -57,7 +54,6 @@ export class MockEndpointController {
     return this.mockEndpointService.getEndpoint(id);
   }
 
-  @Public()
   @Delete('endpoints/:id')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete a mock endpoint using its one-time delete token' })
@@ -72,7 +68,6 @@ export class MockEndpointController {
   // @Res() bypasses Nest's response pipeline: the configured status code,
   // headers, and body have to be set exactly as stored, which doesn't fit
   // decorator-based responses (those are static per-route, not per-record).
-  @Public()
   @All('hit/:id')
   @ApiOperation({
     summary: 'Hit endpoint — send any request here, get back the configured status/body/headers/delay',

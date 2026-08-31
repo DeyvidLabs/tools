@@ -1,40 +1,27 @@
 @import "tailwindcss";
 
+/* Electric Blue theme — the site is dark-only by design (the palette only
+   ever looked right against a near-black background), so there is no
+   prefers-color-scheme: light branch here. */
 :root {
-  --background: #fefaf7;
-  --foreground: #1a1512;
-  --card: #ffffff;
-  --card-foreground: #1a1512;
-  --primary: #b03a2e;
-  --primary-foreground: #fef7f2;
-  --secondary: #f5efe8;
-  --secondary-foreground: #1a1512;
-  --muted: #f5efe8;
-  --muted-foreground: #8a7d70;
-  --border: #e8ddd0;
-  --ring: #b03a2e;
+  --background: #05070d;
+  --foreground: #dce3f5;
+  --card: #0a0e1a;
+  --card-foreground: #dce3f5;
+  --primary: #3b82f6;
+  --primary-foreground: #eaf1ff;
+  --secondary: #0d1220;
+  --secondary-foreground: #dce3f5;
+  --muted: #0d1220;
+  --muted-foreground: #8b98bd;
+  --border: #141b30;
+  --ring: #3b82f6;
 
   --accent-amber: #f99c00;
   --accent-orange: #c1443a;
   --accent-rose: #ff667f;
   --accent-purple: #c07eff;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #17120e;
-    --foreground: #f4ede8;
-    --card: #211a15;
-    --card-foreground: #f4ede8;
-    --primary: #e15b47;
-    --primary-foreground: #1a1512;
-    --secondary: #241d17;
-    --secondary-foreground: #f4ede8;
-    --muted: #241d17;
-    --muted-foreground: #a89a8c;
-    --border: #2c231b;
-    --ring: #e15b47;
-  }
+  --accent-teal: #4dd0c4;
 }
 
 @theme inline {
@@ -54,6 +41,7 @@
   --color-accent-orange: var(--accent-orange);
   --color-accent-rose: var(--accent-rose);
   --color-accent-purple: var(--accent-purple);
+  --color-accent-teal: var(--accent-teal);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
@@ -65,6 +53,7 @@
    page sideways. */
 html {
   scrollbar-gutter: stable;
+  color-scheme: dark;
 }
 
 body {
@@ -101,8 +90,8 @@ body {
 }
 
 /* Grid background: static graph-paper lines, faded out toward the edges via
-   a radial mask, with one restrained warm glow behind the hero. Everything
-   here is static (no keyframes) — zero animation cost, GPU or not. */
+   a radial mask, with one restrained glow behind the hero. Everything here
+   is static (no keyframes) — zero animation cost, GPU or not. */
 .bg-grid {
   position: fixed;
   inset: 0;
@@ -112,15 +101,9 @@ body {
     linear-gradient(to right, var(--border) 1px, transparent 1px),
     linear-gradient(to bottom, var(--border) 1px, transparent 1px);
   background-size: 44px 44px;
-  opacity: 0.5;
+  opacity: 0.6;
   mask-image: radial-gradient(ellipse 70% 60% at 50% 0%, #000 40%, transparent 100%);
   -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 0%, #000 40%, transparent 100%);
-}
-
-@media (prefers-color-scheme: dark) {
-  .bg-grid {
-    opacity: 0.4;
-  }
 }
 
 /* A radial gradient reads visually the same as a solid blob run through
@@ -136,13 +119,7 @@ body {
   z-index: -10;
   width: 42rem;
   height: 24rem;
-  background: radial-gradient(closest-side, var(--accent-orange), transparent);
-  opacity: 0.16;
+  background: radial-gradient(closest-side, var(--primary), transparent);
+  opacity: 0.2;
   pointer-events: none;
-}
-
-@media (prefers-color-scheme: dark) {
-  .bg-glow {
-    opacity: 0.22;
-  }
 }

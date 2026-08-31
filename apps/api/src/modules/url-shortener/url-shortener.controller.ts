@@ -21,7 +21,6 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { Public } from '../../common/decorators/public.decorator';
 import { ShortLink } from '../../common/entities/short-link.entity';
 import {
   CreateShortLinkDto,
@@ -39,7 +38,6 @@ export class UrlShortenerController {
     private readonly configService: ConfigService,
   ) {}
 
-  @Public()
   @Post('shorten')
   @Throttle({ default: { limit: 10, ttl: 60_000 } })
   @HttpCode(HttpStatus.CREATED)
@@ -52,7 +50,6 @@ export class UrlShortenerController {
     return this.urlShortenerService.createShortLink(dto, this.isAdmin(adminToken));
   }
 
-  @Public()
   @Get('shorten/:code')
   @ApiOperation({ summary: 'Fetch a short link (404 if missing or expired)' })
   @ApiOkResponse({ description: 'Short link found', type: ShortLinkDto })
@@ -60,7 +57,6 @@ export class UrlShortenerController {
     return this.urlShortenerService.getShortLink(code);
   }
 
-  @Public()
   @Delete('shorten/:code')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete a short link using its one-time delete token' })
@@ -73,9 +69,8 @@ export class UrlShortenerController {
   }
 
   // Real HTTP redirect (not a JSON body) so this also works for curl and
-  // crawlers, not just browser JS — same @Res()-bypasses-the-pipeline
-  // pattern as AuthController's googleAuthRedirect.
-  @Public()
+  // crawlers, not just browser JS — @Res() bypasses Nest's response pipeline
+  // for that.
   @Get('s/:code')
   @ApiOperation({ summary: 'Redirect to the target URL for a short code' })
   async redirect(@Param('code') code: string, @Res() res: Response): Promise<void> {

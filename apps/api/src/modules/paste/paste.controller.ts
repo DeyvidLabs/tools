@@ -20,7 +20,6 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { Public } from '../../common/decorators/public.decorator';
 import { Paste } from '../../common/entities/paste.entity';
 import {
   CreatePasteDto,
@@ -38,7 +37,6 @@ export class PasteController {
     private readonly configService: ConfigService,
   ) {}
 
-  @Public()
   @Post()
   @Throttle({ default: { limit: 10, ttl: 60_000 } })
   @HttpCode(HttpStatus.CREATED)
@@ -51,7 +49,6 @@ export class PasteController {
     return this.pasteService.createPaste(dto, this.isAdmin(adminToken));
   }
 
-  @Public()
   @Get(':id')
   @ApiOperation({ summary: 'Fetch a paste (404 if missing or expired)' })
   @ApiOkResponse({ description: 'Paste found', type: PasteDto })
@@ -59,7 +56,6 @@ export class PasteController {
     return this.pasteService.getPaste(id);
   }
 
-  @Public()
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete a paste using its one-time delete token' })
