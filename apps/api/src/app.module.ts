@@ -36,7 +36,9 @@ import { AppController } from './app.controller';
         URL_SHORTENER_ADMIN_TOKEN: Joi.string().optional().allow(''),
         MOCK_ENDPOINT_TTL_HOURS: Joi.number().positive().default(24),
       }),
-      validationOptions: { allowUnknown: true, abortEarly: true },
+      validationOptions: {
+        libraryOptions: { allowUnknown: true, abortEarly: true },
+      },
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
