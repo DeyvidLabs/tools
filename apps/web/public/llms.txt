@@ -1,0 +1,46 @@
+# Tools (tools.deyvid.dev)
+
+> Self-hosted collection of ~27 small developer tools. Most run entirely client-side in the browser; five are backed by a small public JSON API for cases that genuinely need server-side state. There are no user accounts — every API endpoint below is open, unauthenticated, and safe to call directly.
+
+If you are an AI agent reading this: the tools under "API tools" are real HTTP (and one WebSocket) endpoints you can call directly with curl/fetch, no browser needed. The tools under "Browser-only tools" have no API — they're pure client-side logic; if you need to replicate what they do, read the linked `lib.ts` source on GitHub instead of guessing.
+
+For full request/response bodies, field-by-field, plus ready-to-run curl examples for every API tool: see /llms-full.txt.
+
+## Docs
+
+- [Extended reference (llms-full.txt)](https://tools.deyvid.dev/llms-full.txt): every API endpoint with full schemas and curl examples, plus the complete tool list.
+- [OpenAPI / Swagger UI](https://tools.deyvid.dev/docs): interactive, always up to date with the deployed API.
+- [Source on GitHub](https://github.com/DeyvidLabs/tools): fallback — read the code directly if this file is ever out of date. Backend controllers live in `apps/api/src/modules/*`, each tool's pure logic in `apps/web/app/<slug>/lib.ts`.
+
+## API tools
+
+- [Webhook Tester](https://tools.deyvid.dev/webhook-tester): create a bin, send any HTTP request to its capture URL, inspect what arrived.
+- [URL Shortener](https://tools.deyvid.dev/url-shortener): turn a long URL into a short self-hosted redirect link.
+- [Pastebin](https://tools.deyvid.dev/pastebin): share a text snippet via a link that expires automatically.
+- [API Mock / Sandbox Endpoint](https://tools.deyvid.dev/mock-endpoint): a URL that replies with a status/body/headers/delay you configured up front.
+- [WebSocket Tester](https://tools.deyvid.dev/websocket-tester): a raw WebSocket echo/relay server, solo or in a shared room.
+
+## Browser-only tools
+
+- [Password Generator](https://tools.deyvid.dev/password-generator): cryptographically secure passwords via the Web Crypto API.
+- [Hash Generator](https://tools.deyvid.dev/hash-generator): MD5, SHA-1, SHA-256, or SHA-512 for text or files.
+- [JWT Debugger](https://tools.deyvid.dev/jwt-debugger): decode a token's header and payload, check its expiration.
+- [ID Generator](https://tools.deyvid.dev/id-generator): batches of UUID v4/v7, ULID, or nanoid, exported as CSV/JSON.
+- [HTTP Request Builder](https://tools.deyvid.dev/http-request-builder): build a request, get curl / fetch() / HTTPie, live.
+- [Subnet / CIDR Calculator](https://tools.deyvid.dev/subnet-cidr-calculator): network/broadcast address, masks, and usable host range.
+- [JSON Formatter / Validator / Diff](https://tools.deyvid.dev/json-formatter-diff): pretty-print, validate, and diff JSON or plain text.
+- [JSON to TypeScript / Zod Schema Generator](https://tools.deyvid.dev/json-to-ts-zod): sample JSON into a TS interface or Zod schema.
+- [CSV / JSON / YAML Converter](https://tools.deyvid.dev/csv-json-yaml-converter): convert between formats with delimiter/header options.
+- [SQL Formatter / Minifier](https://tools.deyvid.dev/sql-formatter): pretty-print or minify SQL across common dialects.
+- [.env Linter](https://tools.deyvid.dev/dotenv-linter): catch duplicate keys, empty values, and mixed quoting.
+- [Markdown Live Previewer](https://tools.deyvid.dev/markdown-previewer): a formatting toolbar with live rendered HTML output.
+- [Regex Tester](https://tools.deyvid.dev/regex-tester): highlighted matches, capture groups, and an explanation.
+- [Encoder/Decoder](https://tools.deyvid.dev/encoder-decoder): Base64, URL, or HTML entity encoding and decoding.
+- [Color Converter](https://tools.deyvid.dev/color-converter): HEX, RGB, HSL, OKLCH, plus derived palettes.
+- [CSS Gradient / Box-Shadow / Clip-Path Generator](https://tools.deyvid.dev/css-shape-generator): build shapes and effects with a live preview.
+- [ANSI / Terminal Color Previewer](https://tools.deyvid.dev/ansi-color-previewer): render raw ANSI escape codes as real terminal output.
+- [QR Code Generator / Reader](https://tools.deyvid.dev/qr-code-generator-reader): generate codes for text, URLs, WiFi, or contacts — or decode one.
+- [Cron Expression Builder](https://tools.deyvid.dev/cron-expression-builder): plain-English cron descriptions with next run times.
+- [Timestamp / Timezone Converter](https://tools.deyvid.dev/timestamp-timezone-converter): Unix, ISO 8601, and human-readable dates in any timezone.
+- [Discord Embed Builder](https://tools.deyvid.dev/discord-embed-builder): build an embed, preview it, and send it to a webhook.
+- [Fake Data Generator](https://tools.deyvid.dev/fake-data-generator): batches of fake names, emails, addresses, and lorem ipsum.

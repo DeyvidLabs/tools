@@ -1,0 +1,165 @@
+# Tools (tools.deyvid.dev) — full reference
+
+> Extended, machine-readable companion to /llms.txt. Full request/response bodies and curl examples for every API-backed tool, plus the complete list of browser-only tools. No accounts, no auth — everything below is open.
+
+All API endpoints are under `https://tools.deyvid.dev/api/`, except the short-link redirect (`/s/:code`). Interactive OpenAPI docs (always in sync with the deployed API): https://tools.deyvid.dev/docs. Full source: https://github.com/DeyvidLabs/tools — backend controllers in `apps/api/src/modules/*`, DTOs in `apps/api/src/common/dto/*.dto.ts`.
+
+Global rate limit: 100 requests/min per IP on every route. The four `create`-type endpoints below (webhook bin excluded) are additionally capped at 10 requests/min per IP. Anything you create is temporary — see each tool's TTL — and deleting early requires the one-time `deleteToken` returned at creation (nothing else can delete it; there's no login to fall back on).
+
+---
+
+## Webhook Tester
+
+Create a bin, then send any HTTP request to its capture URL. Everything about that request (method, headers, query, body, source IP) is recorded and can be read back. Bins live 24h from creation, not renewed by traffic.
+
+Create a bin:
+```
+curl -X POST https://tools.deyvid.dev/api/webhook/bins
+```
+→ `201 { "id": "uuid", "createdAt": "...", "expiresAt": "..." }`
+
+Send it any request (method/body/headers are irrelevant to the response, all get captured):
+```
+curl -X POST https://tools.deyvid.dev/api/webhook/capture/<id> -d '{"hello":"world"}'
+```
+→ `200 { "captured": true }` (body capped at 256KB)
+
+Read what arrived, newest first:
+```
+curl https://tools.deyvid.dev/api/webhook/bins/<id>/requests
+```
+→ `200 [{ "id", "method", "headers": {...}, "query": {...}, "contentType", "body": "...", "bodyEncoding": "utf8"|"base64", "sourceIp", "receivedAt" }, ...]`
+
+Fetch bin metadata: `GET /api/webhook/bins/:id` → same shape as creation, `404` once expired.
+
+---
+
+## URL Shortener
+
+Turn a long URL into a short link that 302-redirects.
+
+Create:
+```
+curl -X POST https://tools.deyvid.dev/api/shorten \
+  -H 'Content-Type: application/json' \
+  -d '{"targetUrl":"https://example.com/some/very/long/path","expiresIn":"1d"}'
+```
+Body: `{ targetUrl: string (http/https, ≤2048 chars), expiresIn: "1h"|"1d"|"1w"|"1m"|"never" }`. `"never"` is rejected with a 400 unless the request carries header `x-shortener-admin-token: <configured token>` — you almost certainly don't have this token; treat `"never"` as unavailable and use `"1m"` for the longest lifetime.
+→ `201 { "id", "code", "targetUrl", "createdAt", "expiresAt", "deleteToken" }`
+
+Resolve the actual short link (real HTTP redirect, works with curl `-L` or a browser — note this is at the domain root, not under `/api`):
+```
+curl -L https://tools.deyvid.dev/s/<code>
+```
+
+Fetch metadata (no redirect): `GET /api/shorten/:code` → same shape as creation minus `deleteToken`, `404` once expired.
+
+Delete early:
+```
+curl -X DELETE https://tools.deyvid.dev/api/shorten/<code> \
+  -H 'Content-Type: application/json' -d '{"deleteToken":"<token>"}'
+```
+→ `204`
+
+---
+
+## Pastebin
+
+Share a text snippet via a link that expires automatically.
+
+Create:
+```
+curl -X POST https://tools.deyvid.dev/api/paste \
+  -H 'Content-Type: application/json' \
+  -d '{"content":"console.log(1)","title":"snippet","language":"typescript","expiresIn":"1d"}'
+```
+Body: `{ content: string (≤262144 chars), title?: string (≤200), language?: string (≤40, free text e.g. "typescript"), expiresIn: "1h"|"1d"|"1w"|"1m"|"never" }`. `"never"` needs header `x-paste-admin-token`, same caveat as the shortener above — use `"1m"` instead if you don't have it.
+→ `201 { "id", "title", "content", "language", "createdAt", "expiresAt", "deleteToken" }`
+
+Fetch: `GET /api/paste/:id` → same shape minus `deleteToken`, `404` once expired.
+
+Delete early:
+```
+curl -X DELETE https://tools.deyvid.dev/api/paste/<id> \
+  -H 'Content-Type: application/json' -d '{"deleteToken":"<token>"}'
+```
+→ `204`
+
+---
+
+## API Mock / Sandbox Endpoint
+
+Configure a URL once; every request sent to it afterwards gets back exactly the status code, JSON body, headers, and delay you configured — useful for testing how your own HTTP client handles a specific response. Lives 24h.
+
+Create:
+```
+curl -X POST https://tools.deyvid.dev/api/mock/endpoints \
+  -H 'Content-Type: application/json' \
+  -d '{"statusCode":429,"responseBody":{"error":"rate limited"},"responseHeaders":{"Retry-After":"30"},"delayMs":500}'
+```
+Body, all fields optional: `{ statusCode?: int 100-599 (default 200), responseBody?: any JSON value (omit for empty body), responseHeaders?: { [key]: string }, delayMs?: int 0-30000 (default 0) }`.
+→ `201 { "id", "createdAt", "expiresAt", "statusCode", "responseBody", "responseHeaders", "delayMs", "deleteToken" }`
+
+Hit it (any method, any path suffix, any body — all ignored, the configured response always comes back verbatim):
+```
+curl -i https://tools.deyvid.dev/api/mock/hit/<id>
+```
+
+Fetch config: `GET /api/mock/endpoints/:id` → same shape minus `deleteToken`, `404` once expired.
+
+Delete early:
+```
+curl -X DELETE https://tools.deyvid.dev/api/mock/endpoints/<id> \
+  -H 'Content-Type: application/json' -d '{"deleteToken":"<token>"}'
+```
+→ `204`
+
+---
+
+## WebSocket Tester
+
+A raw WebSocket server (plain `ws`, not Socket.IO — any standard WebSocket client connects with no extra library).
+
+Connect: `wss://tools.deyvid.dev/api/ws-tester`
+
+- No `?room=` query param → **echo mode**: whatever you send comes straight back to you.
+- `?room=<any-string>` → **relay mode**: your message is broadcast to every other client currently connected with the same room value (sender included). The server also emits JSON system events on join/leave: `{"__type":"system","event":"joined"|"left","room":"<room>","participants":<count>}`.
+
+Example with a WS client (e.g. `wscat`):
+```
+wscat -c "wss://tools.deyvid.dev/api/ws-tester?room=demo"
+```
+Open a second connection to the same room to see relay + participant-count events.
+
+Not available when self-hosting behind a platform that doesn't support persistent connections (e.g. Vercel serverless) — the production deployment at tools.deyvid.dev runs self-hosted specifically so this works.
+
+---
+
+## Browser-only tools
+
+No API — each is pure client-side TypeScript, invoked only through its page's UI. If you need the exact algorithm rather than the UI, read `apps/web/app/<slug>/lib.ts` in the GitHub repo (unit-tested in the sibling `lib.test.ts`).
+
+| Tool | Path | What it does |
+|---|---|---|
+| Password Generator | `/password-generator` | Cryptographically secure passwords via the Web Crypto API. |
+| Hash Generator | `/hash-generator` | MD5, SHA-1, SHA-256, or SHA-512 for text or files. |
+| JWT Debugger | `/jwt-debugger` | Decode a token's header and payload, check its expiration. |
+| ID Generator | `/id-generator` | Batches of UUID v4/v7, ULID, or nanoid, exported as CSV/JSON. |
+| HTTP Request Builder | `/http-request-builder` | Build a request, get curl / fetch() / HTTPie, live. |
+| Subnet / CIDR Calculator | `/subnet-cidr-calculator` | Network/broadcast address, masks, and usable host range. |
+| JSON Formatter / Validator / Diff | `/json-formatter-diff` | Pretty-print, validate, and diff JSON or plain text. |
+| JSON to TypeScript / Zod Schema Generator | `/json-to-ts-zod` | Sample JSON into a TS interface or Zod schema. |
+| CSV / JSON / YAML Converter | `/csv-json-yaml-converter` | Convert between formats with delimiter/header options. |
+| SQL Formatter / Minifier | `/sql-formatter` | Pretty-print or minify SQL across common dialects. |
+| .env Linter | `/dotenv-linter` | Catch duplicate keys, empty values, and mixed quoting. |
+| Markdown Live Previewer | `/markdown-previewer` | A formatting toolbar with live rendered HTML output. |
+| Regex Tester | `/regex-tester` | Highlighted matches, capture groups, and an explanation. |
+| Encoder/Decoder | `/encoder-decoder` | Base64, URL, or HTML entity encoding and decoding. |
+| Color Converter | `/color-converter` | HEX, RGB, HSL, OKLCH, plus derived palettes. |
+| CSS Gradient / Box-Shadow / Clip-Path Generator | `/css-shape-generator` | Build shapes and effects with a live preview. |
+| ANSI / Terminal Color Previewer | `/ansi-color-previewer` | Render raw ANSI escape codes as real terminal output. |
+| QR Code Generator / Reader | `/qr-code-generator-reader` | Generate codes for text, URLs, WiFi, or contacts — or decode one. |
+| Cron Expression Builder | `/cron-expression-builder` | Plain-English cron descriptions with next run times. |
+| Timestamp / Timezone Converter | `/timestamp-timezone-converter` | Unix, ISO 8601, and human-readable dates in any timezone. |
+| Discord Embed Builder | `/discord-embed-builder` | Build an embed, preview it, and send it to a webhook. |
+| Fake Data Generator | `/fake-data-generator` | Batches of fake names, emails, addresses, and lorem ipsum. |

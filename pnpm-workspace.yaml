@@ -2,6 +2,7 @@ packages:
   - "apps/*"
   - "packages/*"
 allowBuilds:
+  '@parcel/watcher': false
   '@scarf/scarf': true
   '@swc/core': true
   sharp: true
