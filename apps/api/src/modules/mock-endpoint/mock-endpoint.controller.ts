@@ -27,7 +27,11 @@ import {
   DeleteMockEndpointDto,
   MockEndpointDto,
 } from '../../common/dto/mock-endpoint.dto';
-import { CreatedMockEndpoint, MockEndpointService } from './mock-endpoint.service';
+import {
+  CreatedMockEndpoint,
+  FORBIDDEN_RESPONSE_HEADERS,
+  MockEndpointService,
+} from './mock-endpoint.service';
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -86,8 +90,14 @@ export class MockEndpointController {
     }
 
     for (const [key, value] of Object.entries(endpoint.responseHeaders)) {
+      // Rows saved before the denylist grew may still hold these.
+      if (FORBIDDEN_RESPONSE_HEADERS.has(key.toLowerCase())) continue;
       res.set(key, value);
     }
+    // User-controlled Content-Type on the tools origin: neutralise script
+    // execution (sandbox without allow-scripts) and MIME sniffing.
+    res.set('X-Content-Type-Options', 'nosniff');
+    res.set('Content-Security-Policy', "sandbox; default-src 'none'");
 
     if (endpoint.responseBody === null || endpoint.responseBody === undefined) {
       res.status(endpoint.statusCode).end();

@@ -24,7 +24,7 @@ export interface HeaderRow {
   value: string;
 }
 
-export const MIN_STATUS_CODE = 100;
+export const MIN_STATUS_CODE = 200;
 export const MAX_STATUS_CODE = 599;
 export const MAX_DELAY_MS = 30_000;
 
@@ -47,13 +47,13 @@ export async function createMockEndpoint(
 }
 
 export async function fetchMockEndpoint(id: string): Promise<MockEndpoint | null> {
-  const res = await fetch(`/api/mock/endpoints/${id}`);
+  const res = await fetch(`/api/mock/endpoints/${encodeURIComponent(id)}`);
   if (res.status === 404) return null;
   return parseJsonOrThrow<MockEndpoint>(res);
 }
 
 export async function deleteMockEndpoint(id: string, deleteToken: string): Promise<boolean> {
-  const res = await fetch(`/api/mock/endpoints/${id}`, {
+  const res = await fetch(`/api/mock/endpoints/${encodeURIComponent(id)}`, {
     method: "DELETE",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ deleteToken }),

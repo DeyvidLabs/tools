@@ -25,6 +25,9 @@ services:
     restart: unless-stopped
     env_file: .env
     environment:
+      # .env.sample ships NODE_ENV=development (CSP off, schema sync, SQL logs);
+      # the compose stack is the deployed one.
+      NODE_ENV: production
       # Overrides the .env value (which points at localhost, for non-docker dev)
       # with the in-network postgres hostname.
       DATABASE_URL: postgresql://${POSTGRES_USER:-nestjs}:${POSTGRES_PASSWORD:-nestjs_secret}@postgres:5432/${POSTGRES_DB:-nestjs_db}

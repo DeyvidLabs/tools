@@ -31,7 +31,17 @@ export const SHELL_TARGETS: ShellTarget[] = ["bash", "powershell", "cmd"];
 
 function shellQuote(value: string, target: ShellTarget): string {
   if (target === "cmd") {
-    return `"${value.replace(/"/g, '\\"')}"`;
+    // Inside "..." cmd metacharacters (& | < > ( )) are inert, so the plain form
+    // is only safe when the value can't close the quote or trigger expansion.
+    if (!/["%^!\r\n]/.test(value)) return `"${value}"`;
+    // Otherwise quote for the program's argv parser (\" and doubled backslashes
+    // before quotes), then caret-escape every metacharacter, wrapper quotes
+    // included, so cmd.exe never sees an unquoted & | etc. (cross-spawn technique).
+    const argv = `"${value
+      .replace(/(\\*)"/g, '$1$1\\"')
+      .replace(/(\\*)$/, "$1$1")
+      .replace(/\r?\n/g, " ")}"`;
+    return argv.replace(/([()[\]%!^"`<>&|;, *?])/g, "^$1");
   }
   if (target === "powershell") {
     return `'${value.replace(/'/g, "''")}'`;

@@ -15,6 +15,7 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 import { Request } from 'express';
 import { WebhookBin } from '../../common/entities/webhook-bin.entity';
 import { WebhookRequest } from '../../common/entities/webhook-request.entity';
@@ -27,6 +28,7 @@ export class WebhookController {
   constructor(private readonly webhookService: WebhookService) {}
 
   @Post('bins')
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create a new webhook bin' })
   @ApiCreatedResponse({ description: 'Bin created', type: WebhookBinDto })
@@ -64,11 +66,15 @@ export class WebhookController {
     @Param('id', ParseUUIDPipe) id: string,
     @Req() req: Request,
   ): Promise<{ captured: boolean }> {
-    const contentType = req.headers['content-type'] ?? null;
+    // Fit the varchar columns and drop NUL (rejected by postgres text/jsonb)
+    // so odd-but-valid requests are captured instead of failing with a 500.
+    const stripNul = <T>(value: T): T =>
+      JSON.parse(JSON.stringify(value).replace(/\\u0000/g, '')) as T;
+    const contentType = req.headers['content-type']?.replace(/\0/g, '').slice(0, 255) ?? null;
     await this.webhookService.capture(id, {
-      method: req.method,
-      headers: req.headers as Record<string, string | string[]>,
-      query: req.query,
+      method: req.method.slice(0, 10),
+      headers: stripNul(req.headers) as Record<string, string | string[]>,
+      query: stripNul(req.query),
       contentType,
       rawBody: req.body as Buffer | undefined,
       sourceIp: req.ip ?? null,

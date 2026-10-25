@@ -15,6 +15,11 @@ interface SystemEvent {
   participants: number;
 }
 
+// ws defaults to 100 MiB per frame; this is a debugging tool, not a file pipe.
+const MAX_PAYLOAD_BYTES = 64 * 1024;
+const MAX_CONNECTIONS = 500;
+const MAX_ROOM_MEMBERS = 50;
+
 function extractRoom(url: string | undefined): string | null {
   if (!url) return null;
   const room = new URL(url, 'http://localhost').searchParams.get('room');
@@ -35,21 +40,34 @@ function systemEvent(
 // HTTP routing, not this adapter's own upgrade-path matching, so the
 // prefix has to be spelled out here explicitly.
 @Injectable()
-@WebSocketGateway({ path: '/api/ws-tester' })
+@WebSocketGateway({ path: '/api/ws-tester', maxPayload: MAX_PAYLOAD_BYTES })
 export class WsTesterGateway
   implements OnGatewayConnection, OnGatewayDisconnect
 {
   private readonly logger = new Logger(WsTesterGateway.name);
+  private connections = 0;
   private readonly clientRooms = new WeakMap<WebSocket, string | null>();
 
   constructor(private readonly registry: WsRoomRegistryService<WebSocket>) {}
 
   handleConnection(client: WebSocket, request: IncomingMessage): void {
+    this.connections++;
+    if (this.connections > MAX_CONNECTIONS) {
+      client.close(1013, 'Too many connections');
+      return;
+    }
+
     const room = extractRoom(request.url);
     this.clientRooms.set(client, room);
 
     if (room) {
       const participants = this.registry.join(room, client);
+      if (participants > MAX_ROOM_MEMBERS) {
+        this.clientRooms.set(client, null);
+        this.registry.leave(room, client);
+        client.close(1008, 'Room is full');
+        return;
+      }
       this.broadcast(room, systemEvent('joined', room, participants));
     } else {
       this.send(client, systemEvent('joined', null, 1));
@@ -61,6 +79,7 @@ export class WsTesterGateway
   }
 
   handleDisconnect(client: WebSocket): void {
+    this.connections = Math.max(0, this.connections - 1);
     const room = this.clientRooms.get(client);
     if (!room) return;
     const participants = this.registry.leave(room, client);

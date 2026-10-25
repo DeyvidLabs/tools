@@ -123,3 +123,10 @@ describe("toolbar edit helpers", () => {
     expect(result.text).toBe("| Header 1 | Header 2 |\n| --- | --- |\n| Cell | Cell |\n");
   });
 });
+
+describe("sanitizeUrl control-character bypass", () => {
+  it("blocks javascript: preceded by a C0 control or split by a tab", () => {
+    expect(sanitizeUrl("\u0001javascript:alert(1)")).toBe("#");
+    expect(sanitizeUrl("java\tscript:alert(1)")).toBe("#");
+  });
+});

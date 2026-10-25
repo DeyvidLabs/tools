@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsInt, IsObject, IsOptional, IsString, Max, Min } from 'class-validator';
 
-export const MIN_STATUS_CODE = 100;
+export const MIN_STATUS_CODE = 200;
 export const MAX_STATUS_CODE = 599;
 export const MAX_DELAY_MS = 30_000;
 export const DEFAULT_STATUS_CODE = 200;

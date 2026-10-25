@@ -31,6 +31,9 @@ import { AppController } from './app.controller';
         PORT: Joi.number().default(3000),
         DATABASE_URL: Joi.string().required(),
         CORS_ORIGIN: Joi.string().default('*'),
+        // Unset = on outside production, off in production.
+        SWAGGER_ENABLED: Joi.boolean().optional(),
+        TRUST_PROXY_HOPS: Joi.number().integer().min(0).optional(),
         WEBHOOK_BIN_TTL_HOURS: Joi.number().positive().default(24),
         PASTE_ADMIN_TOKEN: Joi.string().optional().allow(''),
         URL_SHORTENER_ADMIN_TOKEN: Joi.string().optional().allow(''),

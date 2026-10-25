@@ -16,7 +16,26 @@ const DEFAULT_TTL_HOURS = 24;
 // Headers Node/Express compute from the body and connection state — letting
 // a configured mock override them risks a mismatched Content-Length or a
 // broken keep-alive that corrupts framing for the client under test.
-const FORBIDDEN_RESPONSE_HEADERS = new Set(['content-length', 'transfer-encoding', 'connection']);
+// Security-relevant headers are also off limits: the hit route is served on
+// the tools origin, so a mock must not be able to set cookies or loosen/
+// replace the CSP (the controller re-applies its own after user headers).
+export const FORBIDDEN_RESPONSE_HEADERS = new Set([
+  'content-length',
+  'transfer-encoding',
+  'connection',
+  'content-security-policy',
+  'content-security-policy-report-only',
+  'x-content-type-options',
+  'set-cookie',
+  'content-encoding',
+  'content-disposition',
+  'strict-transport-security',
+]);
+
+// RFC 9110 token for names; visible ASCII/obs-text, SP and HTAB for values
+// (no CR/LF/NUL), so res.set can never throw ERR_INVALID_CHAR on a hit.
+const HEADER_NAME_RE = /^[!#$%&'*+.^_`|~0-9A-Za-z-]+$/;
+const HEADER_VALUE_RE = /^[\t\x20-\x7e\x80-\xff]*$/;
 
 export interface CreatedMockEndpoint extends Omit<MockEndpoint, 'deleteTokenHash'> {
   deleteToken: string;
@@ -88,6 +107,9 @@ export class MockEndpointService {
     for (const [key, value] of Object.entries(headers)) {
       if (typeof value !== 'string') {
         throw new BadRequestException(`Header "${key}" must be a string value`);
+      }
+      if (!HEADER_NAME_RE.test(key) || !HEADER_VALUE_RE.test(value)) {
+        throw new BadRequestException(`Header "${key}" has an invalid name or value`);
       }
       if (FORBIDDEN_RESPONSE_HEADERS.has(key.toLowerCase())) {
         throw new BadRequestException(`Header "${key}" cannot be set on a mock endpoint`);

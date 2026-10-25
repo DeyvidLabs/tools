@@ -60,13 +60,18 @@ describe("buildCurlCommand", () => {
     const cmd = buildCurlCommand(jsonPost, "cmd");
     expect(cmd).toContain(`curl -X POST "https://example.com/api" ^`);
     expect(cmd).toContain(`-H "Content-Type: application/json" ^`);
-    expect(cmd).toContain(`-d "{\\"foo\\":\\"bar\\"}"`);
+    expect(cmd).toContain("-d ^\"{\\^\"foo\\^\":\\^\"bar\\^\"}^\"");
     expect(cmd).not.toContain("'");
   });
 
   it("escapes embedded double quotes for cmd.exe", () => {
     const cmd = buildCurlCommand({ ...baseGet, url: `https://example.com/say-"hi"` }, "cmd");
-    expect(cmd).toBe(`curl "https://example.com/say-\\"hi\\""`);
+    expect(cmd).toBe("curl ^\"https://example.com/say-\\^\"hi\\^\"^\"");
+  });
+
+  it("caret-escapes cmd metacharacters so a quote cannot break out", () => {
+    const cmd = buildCurlCommand({ ...baseGet, url: `https://x.test/a"&calc&"` }, "cmd");
+    expect(cmd).toBe("curl ^\"https://x.test/a\\^\"^&calc^&\\^\"^\"");
   });
 
   it("uses single quotes and a backtick continuation for PowerShell", () => {

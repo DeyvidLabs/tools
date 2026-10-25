@@ -45,7 +45,9 @@ async function bootstrap(): Promise<void> {
 
   // Trust the first proxy hop (nginx/Caddy) so req.ip and the ThrottlerGuard
   // see the real client IP instead of bucketing every request under the proxy's IP.
-  app.set('trust proxy', 1);
+  // Raise TRUST_PROXY_HOPS if more proxies (e.g. Cloudflare) sit in front of nginx.
+  const trustProxyHops = Number.parseInt(process.env.TRUST_PROXY_HOPS ?? '', 10);
+  app.set('trust proxy', Number.isInteger(trustProxyHops) && trustProxyHops >= 0 ? trustProxyHops : 1);
 
   app.enableShutdownHooks();
   app.setGlobalPrefix('api', { exclude: ['health'] });
@@ -89,13 +91,20 @@ async function bootstrap(): Promise<void> {
     .setVersion('1.0')
     .build();
 
-  SwaggerModule.setup('docs', app, () =>
-    SwaggerModule.createDocument(app, swaggerConfig),
-  );
+  const swaggerEnabled =
+    configService.get<boolean>('SWAGGER_ENABLED') ??
+    configService.get<string>('NODE_ENV') !== 'production';
+  if (swaggerEnabled) {
+    SwaggerModule.setup('docs', app, () =>
+      SwaggerModule.createDocument(app, swaggerConfig),
+    );
+  }
 
   await app.listen(port, '0.0.0.0');
   logger.log(`Application running on http://localhost:${port}`);
-  logger.log(`Swagger docs available at http://localhost:${port}/docs`);
+  if (swaggerEnabled) {
+    logger.log(`Swagger docs available at http://localhost:${port}/docs`);
+  }
 }
 
 void bootstrap();

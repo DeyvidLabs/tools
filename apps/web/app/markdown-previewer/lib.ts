@@ -22,7 +22,10 @@ const SAFE_URL = /^(https?:|mailto:|#|\/|\.\/|\.\.\/)/i;
 
 export function sanitizeUrl(url: string): string {
   const trimmed = url.trim();
-  if (/^[a-z][a-z0-9+.-]*:/i.test(trimmed) && !SAFE_URL.test(trimmed)) return "#";
+  // Browsers drop C0 controls/space around the scheme and tab/CR/LF inside it,
+  // so "\u0001javascript:" or "java\tscript:" still run — check the stripped form.
+  const normalized = trimmed.replace(/[\u0000- \u007f-\u009f]/g, "");
+  if (/^[a-z][a-z0-9+.-]*:/i.test(normalized) && !SAFE_URL.test(normalized)) return "#";
   return escapeHtml(trimmed);
 }
 
